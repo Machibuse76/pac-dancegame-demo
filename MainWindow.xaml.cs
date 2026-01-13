@@ -2,6 +2,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using PacDancegameDemo.Models;
@@ -12,11 +13,8 @@ public partial class MainWindow : Window
 {
     private readonly MediaPlayer _player = new();
     private readonly DispatcherTimer _beatTimer = new();
-    private readonly DispatcherTimer _highlightTimer = new();
-    private readonly List<Border> _arrowTargets = new();
     private readonly Random _random = new();
     private readonly Brush _accentBrush;
-    private readonly Brush _defaultBrush;
     private SongItem? _currentSong;
 
     public MainWindow()
@@ -24,12 +22,6 @@ public partial class MainWindow : Window
         InitializeComponent();
 
         _accentBrush = (Brush)Application.Current.Resources["AccentBrush"];
-        _defaultBrush = new SolidColorBrush(Color.FromRgb(0x20, 0x20, 0x20));
-
-        _arrowTargets.Add(ArrowLeft);
-        _arrowTargets.Add(ArrowDown);
-        _arrowTargets.Add(ArrowUp);
-        _arrowTargets.Add(ArrowRight);
 
         SongList.SelectionChanged += SongListOnSelectionChanged;
         PlayButton.Click += PlayButtonOnClick;
@@ -37,9 +29,6 @@ public partial class MainWindow : Window
         BpmSlider.ValueChanged += BpmSliderOnValueChanged;
 
         _beatTimer.Tick += BeatTimerOnTick;
-        _highlightTimer.Interval = TimeSpan.FromMilliseconds(200);
-        _highlightTimer.Tick += HighlightTimerOnTick;
-
         LoadSongs();
         UpdateBpm();
     }
@@ -130,8 +119,7 @@ public partial class MainWindow : Window
     {
         _player.Stop();
         _beatTimer.Stop();
-        _highlightTimer.Stop();
-        ResetArrows();
+        ArrowCanvas.Children.Clear();
     }
 
     private void StartBeatTimer()
@@ -145,25 +133,7 @@ public partial class MainWindow : Window
 
     private void BeatTimerOnTick(object? sender, EventArgs e)
     {
-        ResetArrows();
-        var target = _arrowTargets[_random.Next(_arrowTargets.Count)];
-        target.Background = _accentBrush;
-        _highlightTimer.Stop();
-        _highlightTimer.Start();
-    }
-
-    private void HighlightTimerOnTick(object? sender, EventArgs e)
-    {
-        _highlightTimer.Stop();
-        ResetArrows();
-    }
-
-    private void ResetArrows()
-    {
-        foreach (var arrow in _arrowTargets)
-        {
-            arrow.Background = _defaultBrush;
-        }
+        SpawnArrow();
     }
 
     private void BpmSliderOnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -178,5 +148,48 @@ public partial class MainWindow : Window
     private void UpdateBpm()
     {
         BpmValue.Text = $"{BpmSlider.Value:0} BPM";
+    }
+
+    private void SpawnArrow()
+    {
+        if (ArrowCanvas.ActualWidth <= 0 || ArrowCanvas.ActualHeight <= 0)
+        {
+            return;
+        }
+
+        var arrowGlyphs = new[] { "◀", "▼", "▲", "▶" };
+        var laneCount = arrowGlyphs.Length;
+        var lane = _random.Next(laneCount);
+        var laneWidth = ArrowCanvas.ActualWidth / laneCount;
+        var arrowSize = Math.Min(56, laneWidth - 8);
+        var xOffset = laneWidth * lane + (laneWidth - arrowSize) / 2;
+
+        var arrow = new TextBlock
+        {
+            Text = arrowGlyphs[lane],
+            FontSize = arrowSize,
+            Foreground = _accentBrush,
+            FontWeight = FontWeights.SemiBold,
+            TextAlignment = TextAlignment.Center,
+            Width = arrowSize,
+            Height = arrowSize
+        };
+
+        Canvas.SetLeft(arrow, xOffset);
+        Canvas.SetTop(arrow, ArrowCanvas.ActualHeight + arrowSize);
+        ArrowCanvas.Children.Add(arrow);
+
+        var bpm = Math.Max(60, BpmSlider.Value);
+        var travelSeconds = Math.Max(0.9, 120d / bpm);
+        var animation = new DoubleAnimation
+        {
+            From = ArrowCanvas.ActualHeight + arrowSize,
+            To = -arrowSize,
+            Duration = TimeSpan.FromSeconds(travelSeconds),
+            EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseInOut }
+        };
+
+        animation.Completed += (_, _) => ArrowCanvas.Children.Remove(arrow);
+        arrow.BeginAnimation(Canvas.TopProperty, animation);
     }
 }
