@@ -53,7 +53,27 @@
             </StackPanel>
 
             <Border Grid.Row="1" Background="#66000000" CornerRadius="12" Padding="20">
-              <Canvas x:Name="ArrowCanvas" ClipToBounds="True" />
+              <Grid>
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition />
+                  <ColumnDefinition />
+                  <ColumnDefinition />
+                  <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+
+                <Border x:Name="ArrowLeft" Grid.Column="0" Margin="6" CornerRadius="12" Background="#FF202020" BorderBrush="#FF2F2F2F" BorderThickness="1">
+                  <TextBlock Text="◀" FontSize="48" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" />
+                </Border>
+                <Border x:Name="ArrowDown" Grid.Column="1" Margin="6" CornerRadius="12" Background="#FF202020" BorderBrush="#FF2F2F2F" BorderThickness="1">
+                  <TextBlock Text="▼" FontSize="48" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" />
+                </Border>
+                <Border x:Name="ArrowUp" Grid.Column="2" Margin="6" CornerRadius="12" Background="#FF202020" BorderBrush="#FF2F2F2F" BorderThickness="1">
+                  <TextBlock Text="▲" FontSize="48" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" />
+                </Border>
+                <Border x:Name="ArrowRight" Grid.Column="3" Margin="6" CornerRadius="12" Background="#FF202020" BorderBrush="#FF2F2F2F" BorderThickness="1">
+                  <TextBlock Text="▶" FontSize="48" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" />
+                </Border>
+              </Grid>
             </Border>
           </Grid>
         </Grid>
