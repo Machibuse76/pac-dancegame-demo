@@ -38,13 +38,17 @@ public partial class MainWindow : Window
 
         _beatTimer.Tick += BeatTimerOnTick;
         Loaded += OnLoaded;
-        KeyDown += OnKeyDown;
         LoadSongs();
         UpdateBpm();
         UpdateScoreboard();
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
+    {
+        Focus();
+    }
+
+    private void OnMouseDown(object sender, MouseButtonEventArgs e)
     {
         Focus();
     }
@@ -153,7 +157,7 @@ public partial class MainWindow : Window
         SpawnArrow();
     }
 
-    private void OnKeyDown(object sender, KeyEventArgs e)
+    private void OnPreviewKeyDown(object sender, KeyEventArgs e)
     {
         var lane = e.Key switch
         {
@@ -170,6 +174,7 @@ public partial class MainWindow : Window
         }
 
         HandleHit(lane);
+        e.Handled = true;
     }
 
     private void BpmSliderOnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
