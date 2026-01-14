@@ -21,6 +21,7 @@ public partial class MainWindow : Window
     private readonly DispatcherTimer _feedbackTimer = new();
     private readonly DispatcherTimer _backgroundTimer = new();
     private readonly DispatcherTimer _countdownTimer = new();
+    private readonly DispatcherTimer _failureDisplayTimer = new();
     private readonly Random _random = new();
     private readonly Brush _accentBrush;
     private readonly Brush _perfectBrush = new SolidColorBrush(Color.FromRgb(0x3D, 0xDC, 0xFF));
@@ -59,6 +60,8 @@ public partial class MainWindow : Window
         _backgroundTimer.Tick += BackgroundTimerOnTick;
         _countdownTimer.Interval = TimeSpan.FromSeconds(1);
         _countdownTimer.Tick += CountdownTimerOnTick;
+        _failureDisplayTimer.Interval = TimeSpan.FromSeconds(3);
+        _failureDisplayTimer.Tick += FailureDisplayTimerOnTick;
         Loaded += OnLoaded;
         LoadSongs();
         UpdateBpm();
@@ -170,6 +173,7 @@ public partial class MainWindow : Window
         _beatTimer.Stop();
         _backgroundTimer.Stop();
         _countdownTimer.Stop();
+        _failureDisplayTimer.Stop();
         ClearActiveNotes();
         ArrowCanvas.Children.Clear();
         ClearHitResult();
@@ -477,21 +481,24 @@ public partial class MainWindow : Window
         }
 
         _failed = true;
-        EndSong(failed: true);
+        EndSong(failed: true, showResults: false);
+        _failureDisplayTimer.Stop();
+        _failureDisplayTimer.Start();
     }
 
     private void OnMediaEnded(object? sender, EventArgs e)
     {
-        Dispatcher.Invoke(() => EndSong(failed: false));
+        Dispatcher.Invoke(() => EndSong(failed: false, showResults: true));
     }
 
-    private void EndSong(bool failed)
+    private void EndSong(bool failed, bool showResults)
     {
         _player.Stop();
         _beatTimer.Stop();
         _feedbackTimer.Stop();
         _backgroundTimer.Stop();
         _countdownTimer.Stop();
+        _failureDisplayTimer.Stop();
         StopArrowAnimations();
         ClearHitResult();
         HideCountdown();
@@ -503,7 +510,18 @@ public partial class MainWindow : Window
             BackgroundImage.Opacity = 0.25;
         }
 
-        ShowFinalResults(failed);
+        if (showResults)
+        {
+            ShowFinalResults(failed);
+        }
+    }
+
+    private void FailureDisplayTimerOnTick(object? sender, EventArgs e)
+    {
+        _failureDisplayTimer.Stop();
+        FailureOverlay.Visibility = Visibility.Collapsed;
+        FailedText.Visibility = Visibility.Collapsed;
+        ShowFinalResults(failed: true);
     }
 
     private void StopArrowAnimations()
@@ -575,7 +593,8 @@ public partial class MainWindow : Window
     private void ShowFinalResults(bool failed)
     {
         var maxScore = _totalArrowsSpawned * 100;
-        var ratio = maxScore > 0 ? (double)_score / maxScore : 0d;
+        var cappedScore = Math.Min(_score, maxScore);
+        var ratio = maxScore > 0 ? cappedScore / maxScore : 0d;
         var percent = ratio * 100d;
         var grade = failed ? "F" : GetGrade(percent);
 
