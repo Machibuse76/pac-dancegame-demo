@@ -28,6 +28,7 @@ public partial class MainWindow : Window
     private int _perfectCount;
     private int _goodCount;
     private int _poorCount;
+    private bool _failed;
     private SongItem? _currentSong;
 
     public MainWindow()
@@ -149,6 +150,7 @@ public partial class MainWindow : Window
         ClearActiveNotes();
         ArrowCanvas.Children.Clear();
         ClearHitResult();
+        ResetFailureState();
     }
 
     private void StartBeatTimer()
@@ -304,6 +306,11 @@ public partial class MainWindow : Window
         _poorCount += 1;
         ShowHitResult("Poor", _poorBrush, lane);
         UpdateScoreboard();
+
+        if (_poorCount >= 100)
+        {
+            TriggerFailure();
+        }
     }
 
     private void RemoveNote(ArrowNote note)
@@ -327,6 +334,11 @@ public partial class MainWindow : Window
 
     private void ShowHitResult(string result, Brush brush, int lane)
     {
+        if (_failed)
+        {
+            return;
+        }
+
         ClearHitResult();
         HitResultText.Text = result;
         HitResultText.Foreground = brush;
@@ -345,6 +357,40 @@ public partial class MainWindow : Window
         _feedbackTimer.Stop();
         HitResultText.Text = string.Empty;
         Grid.SetColumn(HitResultText, 0);
+    }
+
+    private void TriggerFailure()
+    {
+        if (_failed)
+        {
+            return;
+        }
+
+        _failed = true;
+        _player.Stop();
+        _beatTimer.Stop();
+        _feedbackTimer.Stop();
+        StopArrowAnimations();
+        ClearHitResult();
+        FailureOverlay.Visibility = Visibility.Visible;
+        FailedText.Visibility = Visibility.Visible;
+        BackgroundImage.Opacity = 0.25;
+    }
+
+    private void StopArrowAnimations()
+    {
+        foreach (var element in ArrowCanvas.Children.OfType<UIElement>())
+        {
+            element.BeginAnimation(Canvas.TopProperty, null);
+        }
+    }
+
+    private void ResetFailureState()
+    {
+        _failed = false;
+        FailureOverlay.Visibility = Visibility.Collapsed;
+        FailedText.Visibility = Visibility.Collapsed;
+        BackgroundImage.Opacity = 0.6;
     }
 
     private double GetLaneWidth()

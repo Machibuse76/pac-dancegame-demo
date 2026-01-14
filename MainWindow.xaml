@@ -87,6 +87,19 @@
                       Panel.ZIndex="3"
                       Width="{Binding ActualWidth, ElementName=LaneGrid}"
                       Height="{Binding ActualHeight, ElementName=LaneGrid}" />
+              <Rectangle x:Name="FailureOverlay"
+                         Fill="#AA000000"
+                         Visibility="Collapsed"
+                         Panel.ZIndex="4" />
+              <TextBlock x:Name="FailedText"
+                         Text="FAILED"
+                         FontSize="64"
+                         FontWeight="Bold"
+                         Foreground="#FFCCCCCC"
+                         HorizontalAlignment="Center"
+                         VerticalAlignment="Center"
+                         Visibility="Collapsed"
+                         Panel.ZIndex="5" />
             </Grid>
           </Grid>
         </Grid>
