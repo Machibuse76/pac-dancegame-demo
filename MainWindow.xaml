@@ -87,28 +87,30 @@
                       Panel.ZIndex="3"
                       Width="{Binding ActualWidth, ElementName=LaneGrid}"
                       Height="{Binding ActualHeight, ElementName=LaneGrid}" />
-              <TextBlock x:Name="GetReadyText"
-                         Text="GET READY"
-                         FontSize="52"
-                         FontWeight="SemiBold"
-                         Foreground="White"
-                         HorizontalAlignment="Center"
-                         VerticalAlignment="Center"
-                         Visibility="Collapsed"
-                         Panel.ZIndex="4" />
-              <TextBlock x:Name="CountdownText"
-                         FontSize="72"
-                         FontWeight="Bold"
-                         Foreground="White"
-                         HorizontalAlignment="Center"
-                         VerticalAlignment="Center"
-                         Visibility="Collapsed"
-                         Panel.ZIndex="4" />
             </Grid>
           </Grid>
         </Grid>
       </Border>
 
+      <TextBlock Grid.Row="0"
+                 x:Name="GetReadyText"
+                 Text="GET READY"
+                 FontSize="52"
+                 FontWeight="SemiBold"
+                 Foreground="White"
+                 HorizontalAlignment="Center"
+                 VerticalAlignment="Center"
+                 Visibility="Collapsed"
+                 Panel.ZIndex="6" />
+      <TextBlock Grid.Row="0"
+                 x:Name="CountdownText"
+                 FontSize="72"
+                 FontWeight="Bold"
+                 Foreground="White"
+                 HorizontalAlignment="Center"
+                 VerticalAlignment="Center"
+                 Visibility="Collapsed"
+                 Panel.ZIndex="6" />
       <Border Grid.Row="0" Background="#AA000000" Visibility="Collapsed" x:Name="FailureOverlay" CornerRadius="16" />
       <TextBlock Grid.Row="0"
                  x:Name="FailedText"
