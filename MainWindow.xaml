@@ -1,0 +1,104 @@
+<Window x:Class="PacDancegameDemo.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Pac Dancegame Demo" Height="720" Width="1200" Background="#FF101010"
+        Focusable="True"
+        PreviewKeyDown="OnPreviewKeyDown"
+        MouseDown="OnMouseDown">
+  <Grid Margin="24">
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="320" />
+      <ColumnDefinition Width="24" />
+      <ColumnDefinition Width="*" />
+    </Grid.ColumnDefinitions>
+
+    <Border Grid.Column="0" Background="{StaticResource PanelBrush}" BorderBrush="{StaticResource PanelBorderBrush}" BorderThickness="1" CornerRadius="12" Padding="16">
+      <StackPanel>
+        <TextBlock Text="Song Library" FontSize="20" Foreground="White" FontWeight="SemiBold" />
+        <TextBlock Text="Drop MP3s into Assets/Songs and matching images into Assets/Images." Margin="0,8,0,16" Foreground="#FFB0B0B0" TextWrapping="Wrap" />
+        <ListBox x:Name="SongList" Height="360" Background="#FF141414" BorderBrush="#FF2A2A2A" Foreground="White" />
+
+        <TextBlock Text="BPM" Margin="0,16,0,4" Foreground="#FFB0B0B0" />
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+          <Slider x:Name="BpmSlider" Minimum="60" Maximum="200" Value="120" Width="200" />
+          <TextBlock x:Name="BpmValue" Margin="12,0,0,0" Foreground="White" FontSize="16" />
+        </StackPanel>
+
+        <StackPanel Orientation="Horizontal" Margin="0,16,0,0">
+          <Button x:Name="PlayButton" Content="Play" Width="90" Height="36" Margin="0,0,12,0" />
+          <Button x:Name="StopButton" Content="Stop" Width="90" Height="36" />
+        </StackPanel>
+
+        <TextBlock Text="Tips" Margin="0,20,0,4" Foreground="#FFB0B0B0" />
+        <TextBlock Text="Match an image name to the MP3 file name (song.mp3 + song.png)." TextWrapping="Wrap" Foreground="#FFB0B0B0" />
+      </StackPanel>
+    </Border>
+
+    <Grid Grid.Column="2">
+      <Grid.RowDefinitions>
+        <RowDefinition Height="*" />
+        <RowDefinition Height="220" />
+      </Grid.RowDefinitions>
+
+      <Border Grid.Row="0" CornerRadius="16" Background="#FF050505" BorderBrush="#FF2A2A2A" BorderThickness="1">
+        <Grid>
+          <Image x:Name="BackgroundImage" Stretch="UniformToFill" Opacity="0.6" />
+          <Grid Margin="24">
+            <Grid.RowDefinitions>
+              <RowDefinition Height="Auto" />
+              <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <StackPanel Grid.Row="0" VerticalAlignment="Top">
+              <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Now Playing" Foreground="White" FontSize="22" FontWeight="SemiBold" />
+                <TextBlock Text=" • " Foreground="#FFB0B0B0" Margin="8,0" />
+                <TextBlock x:Name="NowPlaying" Foreground="#FFB0B0B0" FontSize="18" />
+              </StackPanel>
+              <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                <TextBlock x:Name="ScoreText" Text="Score: 0" Foreground="White" FontSize="16" Margin="0,0,16,0" />
+                <TextBlock x:Name="PerfectText" Text="Perfect: 0" Foreground="#FF3DDCFF" FontSize="16" Margin="0,0,16,0" />
+                <TextBlock x:Name="GoodText" Text="Good: 0" Foreground="#FFB0FFB0" FontSize="16" Margin="0,0,16,0" />
+                <TextBlock x:Name="PoorText" Text="Poor: 0" Foreground="#FFFFB0B0" FontSize="16" />
+              </StackPanel>
+            </StackPanel>
+
+            <Grid Grid.Row="1" x:Name="LaneGrid">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+                <ColumnDefinition />
+                <ColumnDefinition />
+              </Grid.ColumnDefinitions>
+              <Border Grid.Column="0" BorderBrush="#33FFFFFF" BorderThickness="0,0,1,0" />
+              <Border Grid.Column="1" BorderBrush="#33FFFFFF" BorderThickness="0,0,1,0" />
+              <Border Grid.Column="2" BorderBrush="#33FFFFFF" BorderThickness="0,0,1,0" />
+              <Border Grid.Column="3" BorderBrush="#33FFFFFF" BorderThickness="0,0,0,0" />
+              <Border Background="#33FFFFFF" Height="4" VerticalAlignment="Center" Panel.ZIndex="1" />
+              <TextBlock x:Name="HitResultText"
+                         FontSize="42"
+                         FontWeight="SemiBold"
+                         Foreground="White"
+                         HorizontalAlignment="Center"
+                         VerticalAlignment="Center"
+                         Panel.ZIndex="2" />
+              <Canvas x:Name="ArrowCanvas"
+                      ClipToBounds="True"
+                      Panel.ZIndex="3"
+                      Width="{Binding ActualWidth, ElementName=LaneGrid}"
+                      Height="{Binding ActualHeight, ElementName=LaneGrid}" />
+            </Grid>
+          </Grid>
+        </Grid>
+      </Border>
+
+      <Border Grid.Row="1" Margin="0,20,0,0" Background="{StaticResource PanelBrush}" BorderBrush="{StaticResource PanelBorderBrush}" BorderThickness="1" CornerRadius="12" Padding="16">
+        <StackPanel>
+          <TextBlock Text="How to Add Your Own Songs" FontSize="18" Foreground="White" FontWeight="SemiBold" />
+          <TextBlock Margin="0,8,0,0" Foreground="#FFB0B0B0" TextWrapping="Wrap"
+                     Text="1. Copy MP3 files into the Assets/Songs folder.&#x0a;2. Copy background images into Assets/Images.&#x0a;3. Give the image the same filename as the MP3 for auto matching." />
+        </StackPanel>
+      </Border>
+    </Grid>
+  </Grid>
+</Window>
