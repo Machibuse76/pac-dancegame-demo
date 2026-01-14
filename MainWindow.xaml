@@ -46,10 +46,18 @@
               <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <StackPanel Orientation="Horizontal" Grid.Row="0" VerticalAlignment="Top">
-              <TextBlock Text="Now Playing" Foreground="White" FontSize="22" FontWeight="SemiBold" />
-              <TextBlock Text=" • " Foreground="#FFB0B0B0" Margin="8,0" />
-              <TextBlock x:Name="NowPlaying" Foreground="#FFB0B0B0" FontSize="18" />
+            <StackPanel Grid.Row="0" VerticalAlignment="Top" Spacing="10">
+              <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Now Playing" Foreground="White" FontSize="22" FontWeight="SemiBold" />
+                <TextBlock Text=" • " Foreground="#FFB0B0B0" Margin="8,0" />
+                <TextBlock x:Name="NowPlaying" Foreground="#FFB0B0B0" FontSize="18" />
+              </StackPanel>
+              <StackPanel Orientation="Horizontal" Spacing="16">
+                <TextBlock x:Name="ScoreText" Text="Score: 0" Foreground="White" FontSize="16" />
+                <TextBlock x:Name="PerfectText" Text="Perfect: 0" Foreground="#FF3DDCFF" FontSize="16" />
+                <TextBlock x:Name="GoodText" Text="Good: 0" Foreground="#FFB0FFB0" FontSize="16" />
+                <TextBlock x:Name="PoorText" Text="Poor: 0" Foreground="#FFFFB0B0" FontSize="16" />
+              </StackPanel>
             </StackPanel>
 
             <Canvas x:Name="ArrowCanvas" Grid.Row="1" ClipToBounds="True" />

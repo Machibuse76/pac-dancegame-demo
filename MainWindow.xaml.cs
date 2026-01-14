@@ -1,6 +1,7 @@
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
@@ -11,10 +12,17 @@ namespace PacDancegameDemo;
 
 public partial class MainWindow : Window
 {
+    private const double PerfectWindow = 24;
+    private const double GoodWindow = 70;
     private readonly MediaPlayer _player = new();
     private readonly DispatcherTimer _beatTimer = new();
     private readonly Random _random = new();
     private readonly Brush _accentBrush;
+    private readonly List<ArrowNote> _activeNotes = new();
+    private int _score;
+    private int _perfectCount;
+    private int _goodCount;
+    private int _poorCount;
     private SongItem? _currentSong;
 
     public MainWindow()
@@ -29,8 +37,16 @@ public partial class MainWindow : Window
         BpmSlider.ValueChanged += BpmSliderOnValueChanged;
 
         _beatTimer.Tick += BeatTimerOnTick;
+        Loaded += OnLoaded;
+        KeyDown += OnKeyDown;
         LoadSongs();
         UpdateBpm();
+        UpdateScoreboard();
+    }
+
+    private void OnLoaded(object sender, RoutedEventArgs e)
+    {
+        Focus();
     }
 
     private void LoadSongs()
@@ -119,6 +135,7 @@ public partial class MainWindow : Window
     {
         _player.Stop();
         _beatTimer.Stop();
+        ClearActiveNotes();
         ArrowCanvas.Children.Clear();
     }
 
@@ -134,6 +151,25 @@ public partial class MainWindow : Window
     private void BeatTimerOnTick(object? sender, EventArgs e)
     {
         SpawnArrow();
+    }
+
+    private void OnKeyDown(object sender, KeyEventArgs e)
+    {
+        var lane = e.Key switch
+        {
+            Key.Left => 0,
+            Key.Down => 1,
+            Key.Up => 2,
+            Key.Right => 3,
+            _ => -1
+        };
+
+        if (lane < 0)
+        {
+            return;
+        }
+
+        HandleHit(lane);
     }
 
     private void BpmSliderOnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -179,6 +215,9 @@ public partial class MainWindow : Window
         Canvas.SetTop(arrow, ArrowCanvas.ActualHeight + arrowSize);
         ArrowCanvas.Children.Add(arrow);
 
+        var note = new ArrowNote(arrow, lane);
+        _activeNotes.Add(note);
+
         var bpm = Math.Max(60, BpmSlider.Value);
         var travelSeconds = Math.Max(0.9, 120d / bpm);
         var animation = new DoubleAnimation
@@ -189,7 +228,87 @@ public partial class MainWindow : Window
             EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseInOut }
         };
 
-        animation.Completed += (_, _) => ArrowCanvas.Children.Remove(arrow);
+        animation.Completed += (_, _) => RegisterMiss(note);
         arrow.BeginAnimation(Canvas.TopProperty, animation);
     }
+
+    private void HandleHit(int lane)
+    {
+        if (ArrowCanvas.ActualHeight <= 0)
+        {
+            return;
+        }
+
+        var middle = ArrowCanvas.ActualHeight / 2;
+        var candidate = _activeNotes
+            .Where(note => note.Lane == lane)
+            .Select(note => new { note, distance = Math.Abs(GetNoteCenterY(note) - middle) })
+            .OrderBy(result => result.distance)
+            .FirstOrDefault();
+
+        if (candidate is null || candidate.distance > GoodWindow)
+        {
+            RegisterPoor();
+            return;
+        }
+
+        if (candidate.distance <= PerfectWindow)
+        {
+            _perfectCount += 1;
+            _score += 100;
+        }
+        else
+        {
+            _goodCount += 1;
+            _score += 50;
+        }
+
+        RemoveNote(candidate.note);
+        UpdateScoreboard();
+    }
+
+    private double GetNoteCenterY(ArrowNote note)
+    {
+        var position = note.Element.TranslatePoint(new Point(0, 0), ArrowCanvas);
+        return position.Y + note.Element.ActualHeight / 2;
+    }
+
+    private void RegisterMiss(ArrowNote note)
+    {
+        if (!_activeNotes.Contains(note))
+        {
+            return;
+        }
+
+        RegisterPoor();
+        RemoveNote(note);
+    }
+
+    private void RegisterPoor()
+    {
+        _poorCount += 1;
+        _score -= 10;
+        UpdateScoreboard();
+    }
+
+    private void RemoveNote(ArrowNote note)
+    {
+        _activeNotes.Remove(note);
+        ArrowCanvas.Children.Remove(note.Element);
+    }
+
+    private void ClearActiveNotes()
+    {
+        _activeNotes.Clear();
+    }
+
+    private void UpdateScoreboard()
+    {
+        ScoreText.Text = $"Score: {_score}";
+        PerfectText.Text = $"Perfect: {_perfectCount}";
+        GoodText.Text = $"Good: {_goodCount}";
+        PoorText.Text = $"Poor: {_poorCount}";
+    }
+
+    private sealed record ArrowNote(TextBlock Element, int Lane);
 }

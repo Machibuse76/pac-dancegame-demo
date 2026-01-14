@@ -5,7 +5,7 @@ A lightweight C# WPF dance-dance style demo that plays MP3s, shows background im
 ## Features
 - Auto-discovers MP3s dropped into `Assets/Songs`.
 - Auto-matches background images from `Assets/Images` by filename.
-- Adjustable BPM and simple beat-timed arrow prompts.
+- Adjustable BPM, scrolling arrows, and hit-based scoring.
 
 ## Adding your own MP3s and images
 1. Copy MP3 files into `Assets/Songs`.
