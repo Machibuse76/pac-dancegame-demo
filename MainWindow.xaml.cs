@@ -17,6 +17,7 @@ public partial class MainWindow : Window
     private const double GoodWindow = 70;
     private readonly MediaPlayer _player = new();
     private readonly DispatcherTimer _beatTimer = new();
+    private readonly DispatcherTimer _feedbackTimer = new();
     private readonly Random _random = new();
     private readonly Brush _accentBrush;
     private readonly Brush _perfectBrush = new SolidColorBrush(Color.FromRgb(0x3D, 0xDC, 0xFF));
@@ -41,6 +42,8 @@ public partial class MainWindow : Window
         BpmSlider.ValueChanged += BpmSliderOnValueChanged;
 
         _beatTimer.Tick += BeatTimerOnTick;
+        _feedbackTimer.Interval = TimeSpan.FromSeconds(1);
+        _feedbackTimer.Tick += FeedbackTimerOnTick;
         Loaded += OnLoaded;
         LoadSongs();
         UpdateBpm();
@@ -145,7 +148,7 @@ public partial class MainWindow : Window
         _beatTimer.Stop();
         ClearActiveNotes();
         ArrowCanvas.Children.Clear();
-        HitResultText.Text = string.Empty;
+        ClearHitResult();
     }
 
     private void StartBeatTimer()
@@ -213,6 +216,7 @@ public partial class MainWindow : Window
         {
             Text = arrowGlyphs[lane],
             FontSize = arrowSize,
+            FontFamily = new FontFamily("Segoe UI Symbol"),
             Foreground = _accentBrush,
             FontWeight = FontWeights.SemiBold,
             TextAlignment = TextAlignment.Center,
@@ -298,7 +302,6 @@ public partial class MainWindow : Window
     private void RegisterPoor()
     {
         _poorCount += 1;
-        _score -= 10;
         ShowHitResult("Poor", _poorBrush);
         UpdateScoreboard();
     }
@@ -324,8 +327,22 @@ public partial class MainWindow : Window
 
     private void ShowHitResult(string result, Brush brush)
     {
+        ClearHitResult();
         HitResultText.Text = result;
         HitResultText.Foreground = brush;
+        _feedbackTimer.Stop();
+        _feedbackTimer.Start();
+    }
+
+    private void FeedbackTimerOnTick(object? sender, EventArgs e)
+    {
+        ClearHitResult();
+    }
+
+    private void ClearHitResult()
+    {
+        _feedbackTimer.Stop();
+        HitResultText.Text = string.Empty;
     }
 
     private double GetLaneWidth()
