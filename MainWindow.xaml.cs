@@ -261,7 +261,7 @@ public partial class MainWindow : Window
 
         if (candidate is null || candidate.distance > GoodWindow)
         {
-            RegisterPoor();
+            RegisterPoor(lane);
             return;
         }
 
@@ -269,13 +269,13 @@ public partial class MainWindow : Window
         {
             _perfectCount += 1;
             _score += 100;
-            ShowHitResult("Perfect", _perfectBrush);
+            ShowHitResult("Perfect", _perfectBrush, lane);
         }
         else
         {
             _goodCount += 1;
             _score += 50;
-            ShowHitResult("Good", _goodBrush);
+            ShowHitResult("Good", _goodBrush, lane);
         }
 
         RemoveNote(candidate.note);
@@ -295,14 +295,14 @@ public partial class MainWindow : Window
             return;
         }
 
-        RegisterPoor();
+        RegisterPoor(note.Lane);
         RemoveNote(note);
     }
 
-    private void RegisterPoor()
+    private void RegisterPoor(int lane)
     {
         _poorCount += 1;
-        ShowHitResult("Poor", _poorBrush);
+        ShowHitResult("Poor", _poorBrush, lane);
         UpdateScoreboard();
     }
 
@@ -325,11 +325,12 @@ public partial class MainWindow : Window
         PoorText.Text = $"Poor: {_poorCount}";
     }
 
-    private void ShowHitResult(string result, Brush brush)
+    private void ShowHitResult(string result, Brush brush, int lane)
     {
         ClearHitResult();
         HitResultText.Text = result;
         HitResultText.Foreground = brush;
+        Grid.SetColumn(HitResultText, lane);
         _feedbackTimer.Stop();
         _feedbackTimer.Start();
     }
@@ -343,6 +344,7 @@ public partial class MainWindow : Window
     {
         _feedbackTimer.Stop();
         HitResultText.Text = string.Empty;
+        Grid.SetColumn(HitResultText, 0);
     }
 
     private double GetLaneWidth()
