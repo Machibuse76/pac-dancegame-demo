@@ -87,6 +87,23 @@
                       Panel.ZIndex="3"
                       Width="{Binding ActualWidth, ElementName=LaneGrid}"
                       Height="{Binding ActualHeight, ElementName=LaneGrid}" />
+              <TextBlock x:Name="GetReadyText"
+                         Text="GET READY"
+                         FontSize="52"
+                         FontWeight="SemiBold"
+                         Foreground="White"
+                         HorizontalAlignment="Center"
+                         VerticalAlignment="Center"
+                         Visibility="Collapsed"
+                         Panel.ZIndex="4" />
+              <TextBlock x:Name="CountdownText"
+                         FontSize="72"
+                         FontWeight="Bold"
+                         Foreground="White"
+                         HorizontalAlignment="Center"
+                         VerticalAlignment="Center"
+                         Visibility="Collapsed"
+                         Panel.ZIndex="4" />
             </Grid>
           </Grid>
         </Grid>

@@ -19,6 +19,7 @@ public partial class MainWindow : Window
     private readonly DispatcherTimer _beatTimer = new();
     private readonly DispatcherTimer _feedbackTimer = new();
     private readonly DispatcherTimer _backgroundTimer = new();
+    private readonly DispatcherTimer _countdownTimer = new();
     private readonly Random _random = new();
     private readonly Brush _accentBrush;
     private readonly Brush _perfectBrush = new SolidColorBrush(Color.FromRgb(0x3D, 0xDC, 0xFF));
@@ -32,6 +33,7 @@ public partial class MainWindow : Window
     private bool _failed;
     private readonly List<string> _backgroundImages = new();
     private int _backgroundIndex = -1;
+    private int _countdownValue;
     private SongItem? _currentSong;
 
     public MainWindow()
@@ -50,6 +52,8 @@ public partial class MainWindow : Window
         _feedbackTimer.Tick += FeedbackTimerOnTick;
         _backgroundTimer.Interval = TimeSpan.FromSeconds(6);
         _backgroundTimer.Tick += BackgroundTimerOnTick;
+        _countdownTimer.Interval = TimeSpan.FromSeconds(1);
+        _countdownTimer.Tick += CountdownTimerOnTick;
         Loaded += OnLoaded;
         LoadSongs();
         UpdateBpm();
@@ -150,8 +154,8 @@ public partial class MainWindow : Window
         ResetFailureState();
         _player.Open(new Uri(_currentSong.FilePath));
         _player.Play();
-        StartBeatTimer();
         StartBackgroundCycle();
+        StartGameCountdown();
     }
 
     private void StopButtonOnClick(object sender, RoutedEventArgs e)
@@ -159,9 +163,11 @@ public partial class MainWindow : Window
         _player.Stop();
         _beatTimer.Stop();
         _backgroundTimer.Stop();
+        _countdownTimer.Stop();
         ClearActiveNotes();
         ArrowCanvas.Children.Clear();
         ClearHitResult();
+        HideCountdown();
         ResetFailureState();
     }
 
@@ -433,8 +439,10 @@ public partial class MainWindow : Window
         _beatTimer.Stop();
         _feedbackTimer.Stop();
         _backgroundTimer.Stop();
+        _countdownTimer.Stop();
         StopArrowAnimations();
         ClearHitResult();
+        HideCountdown();
         FailureOverlay.Visibility = Visibility.Visible;
         FailedText.Visibility = Visibility.Visible;
         BackgroundImage.Opacity = 0.25;
@@ -454,6 +462,44 @@ public partial class MainWindow : Window
         FailureOverlay.Visibility = Visibility.Collapsed;
         FailedText.Visibility = Visibility.Collapsed;
         BackgroundImage.Opacity = 0.6;
+    }
+
+    private void StartGameCountdown()
+    {
+        _beatTimer.Stop();
+        _countdownTimer.Stop();
+        ClearActiveNotes();
+        ArrowCanvas.Children.Clear();
+        ClearHitResult();
+        _countdownValue = 5;
+        GetReadyText.Visibility = Visibility.Visible;
+        CountdownText.Visibility = Visibility.Collapsed;
+        _countdownTimer.Start();
+    }
+
+    private void CountdownTimerOnTick(object? sender, EventArgs e)
+    {
+        if (_countdownValue == 5)
+        {
+            GetReadyText.Visibility = Visibility.Collapsed;
+            CountdownText.Visibility = Visibility.Visible;
+        }
+
+        CountdownText.Text = _countdownValue.ToString();
+        _countdownValue -= 1;
+
+        if (_countdownValue < 0)
+        {
+            _countdownTimer.Stop();
+            HideCountdown();
+            StartBeatTimer();
+        }
+    }
+
+    private void HideCountdown()
+    {
+        GetReadyText.Visibility = Visibility.Collapsed;
+        CountdownText.Visibility = Visibility.Collapsed;
     }
 
     private double GetLaneWidth()
