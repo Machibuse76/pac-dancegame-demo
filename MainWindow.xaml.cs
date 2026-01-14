@@ -12,12 +12,16 @@ namespace PacDancegameDemo;
 
 public partial class MainWindow : Window
 {
+    private const int LaneCount = 4;
     private const double PerfectWindow = 24;
     private const double GoodWindow = 70;
     private readonly MediaPlayer _player = new();
     private readonly DispatcherTimer _beatTimer = new();
     private readonly Random _random = new();
     private readonly Brush _accentBrush;
+    private readonly Brush _perfectBrush = new SolidColorBrush(Color.FromRgb(0x3D, 0xDC, 0xFF));
+    private readonly Brush _goodBrush = new SolidColorBrush(Color.FromRgb(0xB0, 0xFF, 0xB0));
+    private readonly Brush _poorBrush = new SolidColorBrush(Color.FromRgb(0xFF, 0xB0, 0xB0));
     private readonly List<ArrowNote> _activeNotes = new();
     private int _score;
     private int _perfectCount;
@@ -141,6 +145,7 @@ public partial class MainWindow : Window
         _beatTimer.Stop();
         ClearActiveNotes();
         ArrowCanvas.Children.Clear();
+        HitResultText.Text = string.Empty;
     }
 
     private void StartBeatTimer()
@@ -193,15 +198,14 @@ public partial class MainWindow : Window
 
     private void SpawnArrow()
     {
-        if (ArrowCanvas.ActualWidth <= 0 || ArrowCanvas.ActualHeight <= 0)
+        var laneWidth = GetLaneWidth();
+        if (laneWidth <= 0 || ArrowCanvas.ActualHeight <= 0)
         {
             return;
         }
 
         var arrowGlyphs = new[] { "◀", "▼", "▲", "▶" };
-        var laneCount = arrowGlyphs.Length;
-        var lane = _random.Next(laneCount);
-        var laneWidth = ArrowCanvas.ActualWidth / laneCount;
+        var lane = _random.Next(LaneCount);
         var arrowSize = Math.Min(56, laneWidth - 8);
         var xOffset = laneWidth * lane + (laneWidth - arrowSize) / 2;
 
@@ -261,11 +265,13 @@ public partial class MainWindow : Window
         {
             _perfectCount += 1;
             _score += 100;
+            ShowHitResult("Perfect", _perfectBrush);
         }
         else
         {
             _goodCount += 1;
             _score += 50;
+            ShowHitResult("Good", _goodBrush);
         }
 
         RemoveNote(candidate.note);
@@ -293,6 +299,7 @@ public partial class MainWindow : Window
     {
         _poorCount += 1;
         _score -= 10;
+        ShowHitResult("Poor", _poorBrush);
         UpdateScoreboard();
     }
 
@@ -313,6 +320,22 @@ public partial class MainWindow : Window
         PerfectText.Text = $"Perfect: {_perfectCount}";
         GoodText.Text = $"Good: {_goodCount}";
         PoorText.Text = $"Poor: {_poorCount}";
+    }
+
+    private void ShowHitResult(string result, Brush brush)
+    {
+        HitResultText.Text = result;
+        HitResultText.Foreground = brush;
+    }
+
+    private double GetLaneWidth()
+    {
+        if (LaneGrid.ActualWidth <= 0)
+        {
+            return 0;
+        }
+
+        return LaneGrid.ActualWidth / LaneCount;
     }
 
     private sealed record ArrowNote(TextBlock Element, int Lane);

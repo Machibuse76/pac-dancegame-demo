@@ -63,7 +63,7 @@
               </StackPanel>
             </StackPanel>
 
-            <Grid Grid.Row="1">
+            <Grid Grid.Row="1" x:Name="LaneGrid">
               <Grid.ColumnDefinitions>
                 <ColumnDefinition />
                 <ColumnDefinition />
@@ -74,7 +74,15 @@
               <Border Grid.Column="1" BorderBrush="#33FFFFFF" BorderThickness="0,0,1,0" />
               <Border Grid.Column="2" BorderBrush="#33FFFFFF" BorderThickness="0,0,1,0" />
               <Border Grid.Column="3" BorderBrush="#33FFFFFF" BorderThickness="0,0,0,0" />
-              <Canvas x:Name="ArrowCanvas" ClipToBounds="True" Panel.ZIndex="1" />
+              <Border Background="#33FFFFFF" Height="4" VerticalAlignment="Center" Panel.ZIndex="1" />
+              <TextBlock x:Name="HitResultText"
+                         FontSize="42"
+                         FontWeight="SemiBold"
+                         Foreground="White"
+                         HorizontalAlignment="Center"
+                         VerticalAlignment="Center"
+                         Panel.ZIndex="2" />
+              <Canvas x:Name="ArrowCanvas" ClipToBounds="True" Panel.ZIndex="3" />
             </Grid>
           </Grid>
         </Grid>
