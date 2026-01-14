@@ -5,6 +5,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
+using System.Windows.Media.Effects;
 using System.Windows.Threading;
 using PacDancegameDemo.Models;
 
@@ -30,6 +31,8 @@ public partial class MainWindow : Window
     private int _perfectCount;
     private int _goodCount;
     private int _poorCount;
+    private int _perfectStreak;
+    private int _perfectMultiplier = 1;
     private bool _failed;
     private readonly List<string> _backgroundImages = new();
     private int _backgroundIndex = -1;
@@ -155,6 +158,8 @@ public partial class MainWindow : Window
         _player.Open(new Uri(_currentSong.FilePath));
         _player.Play();
         StartBackgroundCycle();
+        ResetPerfectStreak();
+        UpdateScoreboard();
         StartGameCountdown();
     }
 
@@ -169,6 +174,8 @@ public partial class MainWindow : Window
         ClearHitResult();
         HideCountdown();
         ResetFailureState();
+        ResetPerfectStreak();
+        UpdateScoreboard();
     }
 
     private void StartBeatTimer()
@@ -288,13 +295,20 @@ public partial class MainWindow : Window
         if (candidate.distance <= PerfectWindow)
         {
             _perfectCount += 1;
-            _score += 100;
+            _perfectStreak += 1;
+            if (_perfectStreak % 5 == 0)
+            {
+                _perfectMultiplier += 1;
+            }
+
+            _score += 100 * _perfectMultiplier;
             ShowHitResult("Perfect", _perfectBrush, lane);
         }
         else
         {
             _goodCount += 1;
             _score += 50;
+            ResetPerfectStreak();
             ShowHitResult("Good", _goodBrush, lane);
         }
 
@@ -322,6 +336,7 @@ public partial class MainWindow : Window
     private void RegisterPoor(int lane)
     {
         _poorCount += 1;
+        ResetPerfectStreak();
         ShowHitResult("Poor", _poorBrush, lane);
         UpdateScoreboard();
 
@@ -346,8 +361,10 @@ public partial class MainWindow : Window
     {
         ScoreText.Text = $"Score: {_score}";
         PerfectText.Text = $"Perfect: {_perfectCount}";
+        PerfectMultiplierText.Text = $"x{_perfectMultiplier}";
         GoodText.Text = $"Good: {_goodCount}";
         PoorText.Text = $"Poor: {_poorCount}";
+        UpdatePerfectGlow();
     }
 
     private void ShowHitResult(string result, Brush brush, int lane)
@@ -375,6 +392,30 @@ public partial class MainWindow : Window
         _feedbackTimer.Stop();
         HitResultText.Text = string.Empty;
         Grid.SetColumn(HitResultText, 0);
+    }
+
+    private void ResetPerfectStreak()
+    {
+        _perfectStreak = 0;
+        _perfectMultiplier = 1;
+    }
+
+    private void UpdatePerfectGlow()
+    {
+        if (_perfectStreak >= 5)
+        {
+            PerfectText.Effect = new DropShadowEffect
+            {
+                Color = Colors.Cyan,
+                BlurRadius = 18,
+                ShadowDepth = 0,
+                Opacity = 0.9
+            };
+        }
+        else
+        {
+            PerfectText.Effect = null;
+        }
     }
 
     private void LoadBackgroundImages(string imagePath)

@@ -57,7 +57,10 @@
               </StackPanel>
               <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
                 <TextBlock x:Name="ScoreText" Text="Score: 0" Foreground="White" FontSize="16" Margin="0,0,16,0" />
-                <TextBlock x:Name="PerfectText" Text="Perfect: 0" Foreground="#FF3DDCFF" FontSize="16" Margin="0,0,16,0" />
+                <StackPanel Margin="0,0,16,0">
+                  <TextBlock x:Name="PerfectText" Text="Perfect: 0" Foreground="#FF3DDCFF" FontSize="16" />
+                  <TextBlock x:Name="PerfectMultiplierText" Text="x1" Foreground="#FF7EEBFF" FontSize="14" />
+                </StackPanel>
                 <TextBlock x:Name="GoodText" Text="Good: 0" Foreground="#FFB0FFB0" FontSize="16" Margin="0,0,16,0" />
                 <TextBlock x:Name="PoorText" Text="Poor: 0" Foreground="#FFFFB0B0" FontSize="16" />
               </StackPanel>
