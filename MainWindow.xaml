@@ -87,23 +87,21 @@
                       Panel.ZIndex="3"
                       Width="{Binding ActualWidth, ElementName=LaneGrid}"
                       Height="{Binding ActualHeight, ElementName=LaneGrid}" />
-              <Rectangle x:Name="FailureOverlay"
-                         Fill="#AA000000"
-                         Visibility="Collapsed"
-                         Panel.ZIndex="4" />
-              <TextBlock x:Name="FailedText"
-                         Text="FAILED"
-                         FontSize="64"
-                         FontWeight="Bold"
-                         Foreground="#FFCCCCCC"
-                         HorizontalAlignment="Center"
-                         VerticalAlignment="Center"
-                         Visibility="Collapsed"
-                         Panel.ZIndex="5" />
             </Grid>
           </Grid>
         </Grid>
       </Border>
+
+      <Border Grid.Row="0" Background="#AA000000" Visibility="Collapsed" x:Name="FailureOverlay" CornerRadius="16" />
+      <TextBlock Grid.Row="0"
+                 x:Name="FailedText"
+                 Text="FAILED"
+                 FontSize="64"
+                 FontWeight="Bold"
+                 Foreground="#FFCCCCCC"
+                 HorizontalAlignment="Center"
+                 VerticalAlignment="Center"
+                 Visibility="Collapsed" />
 
       <Border Grid.Row="1" Margin="0,20,0,0" Background="{StaticResource PanelBrush}" BorderBrush="{StaticResource PanelBorderBrush}" BorderThickness="1" CornerRadius="12" Padding="16">
         <StackPanel>
