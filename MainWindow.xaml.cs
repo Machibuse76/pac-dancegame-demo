@@ -18,6 +18,7 @@ public partial class MainWindow : Window
     private readonly MediaPlayer _player = new();
     private readonly DispatcherTimer _beatTimer = new();
     private readonly DispatcherTimer _feedbackTimer = new();
+    private readonly DispatcherTimer _backgroundTimer = new();
     private readonly Random _random = new();
     private readonly Brush _accentBrush;
     private readonly Brush _perfectBrush = new SolidColorBrush(Color.FromRgb(0x3D, 0xDC, 0xFF));
@@ -29,6 +30,8 @@ public partial class MainWindow : Window
     private int _goodCount;
     private int _poorCount;
     private bool _failed;
+    private readonly List<string> _backgroundImages = new();
+    private int _backgroundIndex = -1;
     private SongItem? _currentSong;
 
     public MainWindow()
@@ -45,6 +48,8 @@ public partial class MainWindow : Window
         _beatTimer.Tick += BeatTimerOnTick;
         _feedbackTimer.Interval = TimeSpan.FromSeconds(1);
         _feedbackTimer.Tick += FeedbackTimerOnTick;
+        _backgroundTimer.Interval = TimeSpan.FromSeconds(6);
+        _backgroundTimer.Tick += BackgroundTimerOnTick;
         Loaded += OnLoaded;
         LoadSongs();
         UpdateBpm();
@@ -69,6 +74,8 @@ public partial class MainWindow : Window
 
         Directory.CreateDirectory(songPath);
         Directory.CreateDirectory(imagePath);
+
+        LoadBackgroundImages(imagePath);
 
         var songs = Directory.GetFiles(songPath, "*.mp3")
             .Select(file => new SongItem
@@ -124,6 +131,8 @@ public partial class MainWindow : Window
         if (!string.IsNullOrWhiteSpace(song.ImagePath) && File.Exists(song.ImagePath))
         {
             BackgroundImage.Source = new BitmapImage(new Uri(song.ImagePath));
+            _backgroundIndex = _backgroundImages.FindIndex(path =>
+                string.Equals(path, song.ImagePath, StringComparison.OrdinalIgnoreCase));
         }
         else
         {
@@ -138,15 +147,18 @@ public partial class MainWindow : Window
             return;
         }
 
+        ResetFailureState();
         _player.Open(new Uri(_currentSong.FilePath));
         _player.Play();
         StartBeatTimer();
+        StartBackgroundCycle();
     }
 
     private void StopButtonOnClick(object sender, RoutedEventArgs e)
     {
         _player.Stop();
         _beatTimer.Stop();
+        _backgroundTimer.Stop();
         ClearActiveNotes();
         ArrowCanvas.Children.Clear();
         ClearHitResult();
@@ -359,6 +371,56 @@ public partial class MainWindow : Window
         Grid.SetColumn(HitResultText, 0);
     }
 
+    private void LoadBackgroundImages(string imagePath)
+    {
+        _backgroundImages.Clear();
+        var extensions = new[] { "*.png", "*.jpg", "*.jpeg" };
+        foreach (var extension in extensions)
+        {
+            _backgroundImages.AddRange(Directory.GetFiles(imagePath, extension));
+        }
+
+        _backgroundImages.Sort(StringComparer.OrdinalIgnoreCase);
+    }
+
+    private void StartBackgroundCycle()
+    {
+        if (_backgroundImages.Count == 0)
+        {
+            return;
+        }
+
+        _backgroundTimer.Stop();
+        if (_backgroundIndex < 0 || _backgroundIndex >= _backgroundImages.Count)
+        {
+            _backgroundIndex = 0;
+        }
+
+        SetBackgroundImage(_backgroundImages[_backgroundIndex]);
+        _backgroundTimer.Start();
+    }
+
+    private void BackgroundTimerOnTick(object? sender, EventArgs e)
+    {
+        if (_backgroundImages.Count == 0 || _failed)
+        {
+            return;
+        }
+
+        _backgroundIndex = (_backgroundIndex + 1) % _backgroundImages.Count;
+        SetBackgroundImage(_backgroundImages[_backgroundIndex]);
+    }
+
+    private void SetBackgroundImage(string path)
+    {
+        if (!File.Exists(path))
+        {
+            return;
+        }
+
+        BackgroundImage.Source = new BitmapImage(new Uri(path));
+    }
+
     private void TriggerFailure()
     {
         if (_failed)
@@ -370,6 +432,7 @@ public partial class MainWindow : Window
         _player.Stop();
         _beatTimer.Stop();
         _feedbackTimer.Stop();
+        _backgroundTimer.Stop();
         StopArrowAnimations();
         ClearHitResult();
         FailureOverlay.Visibility = Visibility.Visible;
