@@ -36,6 +36,7 @@ public partial class MainWindow : Window
     private bool _failed;
     private readonly List<string> _backgroundImages = new();
     private int _backgroundIndex = -1;
+    private int _totalArrowsSpawned;
     private int _countdownValue;
     private SongItem? _currentSong;
 
@@ -44,6 +45,7 @@ public partial class MainWindow : Window
         InitializeComponent();
 
         _accentBrush = (Brush)Application.Current.Resources["AccentBrush"];
+        _player.MediaEnded += OnMediaEnded;
 
         SongList.SelectionChanged += SongListOnSelectionChanged;
         PlayButton.Click += PlayButtonOnClick;
@@ -158,8 +160,7 @@ public partial class MainWindow : Window
         _player.Open(new Uri(_currentSong.FilePath));
         _player.Play();
         StartBackgroundCycle();
-        ResetPerfectStreak();
-        UpdateScoreboard();
+        ResetSessionStats();
         StartGameCountdown();
     }
 
@@ -174,8 +175,7 @@ public partial class MainWindow : Window
         ClearHitResult();
         HideCountdown();
         ResetFailureState();
-        ResetPerfectStreak();
-        UpdateScoreboard();
+        ResetSessionStats();
     }
 
     private void StartBeatTimer()
@@ -257,6 +257,7 @@ public partial class MainWindow : Window
 
         var note = new ArrowNote(arrow, lane);
         _activeNotes.Add(note);
+        _totalArrowsSpawned += 1;
 
         var bpm = Math.Max(60, BpmSlider.Value);
         var travelSeconds = Math.Max(0.9, 120d / bpm);
@@ -476,6 +477,16 @@ public partial class MainWindow : Window
         }
 
         _failed = true;
+        EndSong(failed: true);
+    }
+
+    private void OnMediaEnded(object? sender, EventArgs e)
+    {
+        Dispatcher.Invoke(() => EndSong(failed: false));
+    }
+
+    private void EndSong(bool failed)
+    {
         _player.Stop();
         _beatTimer.Stop();
         _feedbackTimer.Stop();
@@ -484,9 +495,15 @@ public partial class MainWindow : Window
         StopArrowAnimations();
         ClearHitResult();
         HideCountdown();
-        FailureOverlay.Visibility = Visibility.Visible;
-        FailedText.Visibility = Visibility.Visible;
-        BackgroundImage.Opacity = 0.25;
+
+        if (failed)
+        {
+            FailureOverlay.Visibility = Visibility.Visible;
+            FailedText.Visibility = Visibility.Visible;
+            BackgroundImage.Opacity = 0.25;
+        }
+
+        ShowFinalResults(failed);
     }
 
     private void StopArrowAnimations()
@@ -541,6 +558,44 @@ public partial class MainWindow : Window
     {
         GetReadyText.Visibility = Visibility.Collapsed;
         CountdownText.Visibility = Visibility.Collapsed;
+    }
+
+    private void ResetSessionStats()
+    {
+        _score = 0;
+        _perfectCount = 0;
+        _goodCount = 0;
+        _poorCount = 0;
+        _totalArrowsSpawned = 0;
+        ResetPerfectStreak();
+        UpdateScoreboard();
+        FinalScorePanel.Visibility = Visibility.Collapsed;
+    }
+
+    private void ShowFinalResults(bool failed)
+    {
+        var maxScore = _totalArrowsSpawned * 100;
+        var ratio = maxScore > 0 ? (double)_score / maxScore : 0d;
+        var percent = ratio * 100d;
+        var grade = failed ? "F" : GetGrade(percent);
+
+        FinalScoreText.Text = $"Score: {_score}";
+        FinalGradeText.Text = $"Grade: {grade}";
+        FinalAccuracyText.Text = $"Accuracy: {percent:0}%";
+        FinalArrowsText.Text = $"Arrows: {_totalArrowsSpawned}";
+        FinalScorePanel.Visibility = Visibility.Visible;
+    }
+
+    private static string GetGrade(double percent)
+    {
+        return percent switch
+        {
+            >= 90 => "A",
+            >= 80 => "B",
+            >= 70 => "C",
+            >= 60 => "D",
+            _ => "F"
+        };
     }
 
     private double GetLaneWidth()
