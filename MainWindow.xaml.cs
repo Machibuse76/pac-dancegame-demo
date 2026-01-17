@@ -38,6 +38,8 @@ public partial class MainWindow : Window
     private int _perfectStreak;
     private int _perfectMultiplier = 1;
     private bool _failed;
+    private bool _isPlaying;
+    private int _bpm = 80;
     private readonly List<string> _backgroundImages = new();
     private int _backgroundIndex = -1;
     private int _totalArrowsSpawned;
@@ -53,11 +55,11 @@ public partial class MainWindow : Window
         _accentBrush = (Brush)Application.Current.Resources["AccentBrush"];
         _player.MediaEnded += OnMediaEnded;
 
-        PlayButton.Click += PlayButtonOnClick;
-        StopButton.Click += StopButtonOnClick;
         PrevSongButton.Click += PrevSongButtonOnClick;
         NextSongButton.Click += NextSongButtonOnClick;
-        BpmSlider.ValueChanged += BpmSliderOnValueChanged;
+        EasyButton.Click += EasyButtonOnClick;
+        StandardButton.Click += StandardButtonOnClick;
+        ExpertButton.Click += ExpertButtonOnClick;
 
         _beatTimer.Tick += BeatTimerOnTick;
         _feedbackTimer.Interval = TimeSpan.FromSeconds(1);
@@ -132,7 +134,7 @@ public partial class MainWindow : Window
 
         return new SongItem
         {
-            Name = IOPath.GetFileName(folderPath),
+            Name = IOPath.GetFileNameWithoutExtension(mp3),
             FilePath = mp3,
             ImagePath = File.Exists(titleImage) ? titleImage : null,
             BackgroundImages = images
@@ -207,7 +209,7 @@ public partial class MainWindow : Window
         SetCurrentSong(_songs[_songIndex]);
     }
 
-    private void PlayButtonOnClick(object sender, RoutedEventArgs e)
+    private void StartGame()
     {
         if (_currentSong is null)
         {
@@ -216,6 +218,7 @@ public partial class MainWindow : Window
 
         ResetFailureState();
         SongCarouselPanel.Visibility = Visibility.Collapsed;
+        _isPlaying = true;
         _player.Open(new Uri(_currentSong.FilePath));
         _player.Play();
         StartBackgroundCycle();
@@ -223,27 +226,10 @@ public partial class MainWindow : Window
         StartGameCountdown();
     }
 
-    private void StopButtonOnClick(object sender, RoutedEventArgs e)
-    {
-        _player.Stop();
-        _beatTimer.Stop();
-        _backgroundTimer.Stop();
-        _countdownTimer.Stop();
-        _failureDisplayTimer.Stop();
-        ClearActiveNotes();
-        ArrowCanvas.Children.Clear();
-        ClearHitResult();
-        HideCountdown();
-        ResetFailureState();
-        ResetSessionStats();
-        SongCarouselPanel.Visibility = Visibility.Visible;
-    }
-
     private void StartBeatTimer()
     {
         _beatTimer.Stop();
-        var bpm = BpmSlider.Value;
-        var interval = TimeSpan.FromSeconds(60d / bpm);
+        var interval = TimeSpan.FromSeconds(60d / _bpm);
         _beatTimer.Interval = interval;
         _beatTimer.Start();
     }
@@ -255,6 +241,18 @@ public partial class MainWindow : Window
 
     private void OnPreviewKeyDown(object sender, KeyEventArgs e)
     {
+        if (!_isPlaying && (e.Key == Key.Enter || e.Key == Key.Space || e.Key == Key.D1 || e.Key == Key.NumPad1))
+        {
+            StartGame();
+            e.Handled = true;
+            return;
+        }
+
+        if (!_isPlaying)
+        {
+            return;
+        }
+
         var lane = e.Key switch
         {
             Key.Left => 0,
@@ -275,6 +273,11 @@ public partial class MainWindow : Window
 
     private void OnPreviewKeyUp(object sender, KeyEventArgs e)
     {
+        if (!_isPlaying)
+        {
+            return;
+        }
+
         var lane = e.Key switch
         {
             Key.Left => 0,
@@ -293,18 +296,9 @@ public partial class MainWindow : Window
         e.Handled = true;
     }
 
-    private void BpmSliderOnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-    {
-        UpdateBpm();
-        if (_beatTimer.IsEnabled)
-        {
-            StartBeatTimer();
-        }
-    }
-
     private void UpdateBpm()
     {
-        BpmValue.Text = $"{BpmSlider.Value:0} BPM";
+        BpmValue.Text = $"{_bpm} BPM";
     }
 
     private void SpawnBeatNotes()
@@ -367,7 +361,7 @@ public partial class MainWindow : Window
         _activeNotes.Add(note);
         _totalArrowsSpawned += 1;
 
-        var bpm = Math.Max(60, BpmSlider.Value);
+        var bpm = Math.Max(60, _bpm);
         var travelSeconds = Math.Max(0.9, 120d / bpm);
         var animation = new DoubleAnimation
         {
@@ -676,6 +670,7 @@ public partial class MainWindow : Window
         StopArrowAnimations();
         ClearHitResult();
         HideCountdown();
+        _isPlaying = false;
 
         if (failed)
         {
@@ -764,6 +759,31 @@ public partial class MainWindow : Window
         ResetPerfectStreak();
         UpdateScoreboard();
         FinalScorePanel.Visibility = Visibility.Collapsed;
+    }
+
+    private void EasyButtonOnClick(object sender, RoutedEventArgs e)
+    {
+        SetDifficulty(60);
+    }
+
+    private void StandardButtonOnClick(object sender, RoutedEventArgs e)
+    {
+        SetDifficulty(80);
+    }
+
+    private void ExpertButtonOnClick(object sender, RoutedEventArgs e)
+    {
+        SetDifficulty(100);
+    }
+
+    private void SetDifficulty(int bpm)
+    {
+        _bpm = bpm;
+        UpdateBpm();
+        if (_beatTimer.IsEnabled)
+        {
+            StartBeatTimer();
+        }
     }
 
     private void ShowFinalResults(bool failed)
