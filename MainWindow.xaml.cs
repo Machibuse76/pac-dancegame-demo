@@ -47,6 +47,7 @@ public partial class MainWindow : Window
     private readonly List<SongItem> _songs = new();
     private int _songIndex;
     private SongItem? _currentSong;
+    private bool _hasVideoBackground;
 
     public MainWindow()
     {
@@ -120,6 +121,7 @@ public partial class MainWindow : Window
         }
 
         var titleImage = IOPath.Combine(folderPath, "title.png");
+        var video = Directory.GetFiles(folderPath, "*.mp4").FirstOrDefault();
         var images = Directory.GetFiles(folderPath)
             .Where(file =>
             {
@@ -137,6 +139,7 @@ public partial class MainWindow : Window
             Name = IOPath.GetFileNameWithoutExtension(mp3),
             FilePath = mp3,
             ImagePath = File.Exists(titleImage) ? titleImage : null,
+            VideoPath = video,
             BackgroundImages = images
         };
     }
@@ -185,6 +188,7 @@ public partial class MainWindow : Window
         _backgroundImages.Clear();
         _backgroundImages.AddRange(song.BackgroundImages);
         _backgroundIndex = 0;
+        _hasVideoBackground = !string.IsNullOrWhiteSpace(song.VideoPath) && File.Exists(song.VideoPath);
     }
 
     private void PrevSongButtonOnClick(object sender, RoutedEventArgs e)
@@ -602,6 +606,14 @@ public partial class MainWindow : Window
 
     private void StartBackgroundCycle()
     {
+        if (_hasVideoBackground && _currentSong?.VideoPath is { } videoPath)
+        {
+            StartVideoBackground(videoPath);
+            return;
+        }
+
+        StopVideoBackground();
+
         if (_backgroundImages.Count == 0)
         {
             BackgroundImage.Source = _currentSong?.ImagePath is { } titlePath && File.Exists(titlePath)
@@ -641,6 +653,37 @@ public partial class MainWindow : Window
         BackgroundImage.Source = new BitmapImage(new Uri(path));
     }
 
+    private void StartVideoBackground(string path)
+    {
+        if (!File.Exists(path))
+        {
+            return;
+        }
+
+        BackgroundVideo.Visibility = Visibility.Visible;
+        BackgroundImage.Visibility = Visibility.Collapsed;
+        BackgroundVideo.Source = new Uri(path);
+        BackgroundVideo.MediaEnded -= OnBackgroundVideoEnded;
+        BackgroundVideo.MediaEnded += OnBackgroundVideoEnded;
+        BackgroundVideo.Position = TimeSpan.Zero;
+        BackgroundVideo.Play();
+    }
+
+    private void StopVideoBackground()
+    {
+        BackgroundVideo.Stop();
+        BackgroundVideo.Source = null;
+        BackgroundVideo.Visibility = Visibility.Collapsed;
+        BackgroundImage.Visibility = Visibility.Visible;
+        BackgroundVideo.MediaEnded -= OnBackgroundVideoEnded;
+    }
+
+    private void OnBackgroundVideoEnded(object? sender, RoutedEventArgs e)
+    {
+        BackgroundVideo.Position = TimeSpan.Zero;
+        BackgroundVideo.Play();
+    }
+
     private void TriggerFailure()
     {
         if (_failed)
@@ -671,6 +714,7 @@ public partial class MainWindow : Window
         ClearHitResult();
         HideCountdown();
         _isPlaying = false;
+        StopVideoBackground();
 
         if (failed)
         {

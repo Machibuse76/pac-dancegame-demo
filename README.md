@@ -12,6 +12,7 @@ A lightweight C# WPF dance-dance style demo that plays MP3s, shows background im
 2. Copy an MP3 into that folder.
 3. Add `title.png` in the same folder for the song title image.
 4. Add any additional PNG/JPG images in the folder for background cycling.
+5. (Optional) Add an MP4 in the folder to play as a muted background video instead of cycling images.
 
 ## Running the app
 ```bash
