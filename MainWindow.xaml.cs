@@ -88,21 +88,14 @@ public partial class MainWindow : Window
     {
         var basePath = AppContext.BaseDirectory;
         var songPath = IOPath.Combine(basePath, "Assets", "Songs");
-        var imagePath = IOPath.Combine(basePath, "Assets", "Images");
 
         Directory.CreateDirectory(songPath);
-        Directory.CreateDirectory(imagePath);
-
-        LoadBackgroundImages(imagePath);
 
         _songs.Clear();
-        _songs.AddRange(Directory.GetFiles(songPath, "*.mp3")
-            .Select(file => new SongItem
-            {
-                Name = IOPath.GetFileNameWithoutExtension(file),
-                FilePath = file,
-                ImagePath = FindMatchingImage(imagePath, file)
-            })
+        _songs.AddRange(Directory.GetDirectories(songPath)
+            .Select(BuildSongFromFolder)
+            .Where(song => song is not null)
+            .Select(song => song!)
             .OrderBy(song => song.Name)
             .ToList());
 
@@ -118,22 +111,34 @@ public partial class MainWindow : Window
         }
     }
 
-    private static string? FindMatchingImage(string imageRoot, string songFilePath)
+    private static SongItem? BuildSongFromFolder(string folderPath)
     {
-        var baseName = IOPath.GetFileNameWithoutExtension(songFilePath);
-        var possibleExtensions = new[] { ".png", ".jpg", ".jpeg" };
-
-        foreach (var extension in possibleExtensions)
+        var mp3 = Directory.GetFiles(folderPath, "*.mp3").FirstOrDefault();
+        if (string.IsNullOrWhiteSpace(mp3))
         {
-            var candidate = IOPath.Combine(imageRoot, baseName + extension);
-            if (File.Exists(candidate))
-            {
-                return candidate;
-            }
+            return null;
         }
 
-        return Directory.GetFiles(imageRoot)
-            .FirstOrDefault(file => possibleExtensions.Contains(IOPath.GetExtension(file), StringComparer.OrdinalIgnoreCase));
+        var titleImage = IOPath.Combine(folderPath, "title.png");
+        var images = Directory.GetFiles(folderPath)
+            .Where(file =>
+            {
+                var extension = IOPath.GetExtension(file);
+                return extension.Equals(".png", StringComparison.OrdinalIgnoreCase)
+                    || extension.Equals(".jpg", StringComparison.OrdinalIgnoreCase)
+                    || extension.Equals(".jpeg", StringComparison.OrdinalIgnoreCase);
+            })
+            .Where(file => !file.Equals(titleImage, StringComparison.OrdinalIgnoreCase))
+            .OrderBy(file => file, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        return new SongItem
+        {
+            Name = IOPath.GetFileName(folderPath),
+            FilePath = mp3,
+            ImagePath = File.Exists(titleImage) ? titleImage : null,
+            BackgroundImages = images
+        };
     }
 
     private void SetCurrentSong(SongItem song)
@@ -145,8 +150,6 @@ public partial class MainWindow : Window
         if (!string.IsNullOrWhiteSpace(song.ImagePath) && File.Exists(song.ImagePath))
         {
             BackgroundImage.Source = new BitmapImage(new Uri(song.ImagePath));
-            _backgroundIndex = _backgroundImages.FindIndex(path =>
-                string.Equals(path, song.ImagePath, StringComparison.OrdinalIgnoreCase));
             SongPreviewImage.Source = new BitmapImage(new Uri(song.ImagePath));
         }
         else
@@ -154,6 +157,10 @@ public partial class MainWindow : Window
             BackgroundImage.Source = null;
             SongPreviewImage.Source = null;
         }
+
+        _backgroundImages.Clear();
+        _backgroundImages.AddRange(song.BackgroundImages);
+        _backgroundIndex = 0;
     }
 
     private void PrevSongButtonOnClick(object sender, RoutedEventArgs e)
@@ -577,22 +584,13 @@ public partial class MainWindow : Window
         }
     }
 
-    private void LoadBackgroundImages(string imagePath)
-    {
-        _backgroundImages.Clear();
-        var extensions = new[] { "*.png", "*.jpg", "*.jpeg" };
-        foreach (var extension in extensions)
-        {
-            _backgroundImages.AddRange(Directory.GetFiles(imagePath, extension));
-        }
-
-        _backgroundImages.Sort(StringComparer.OrdinalIgnoreCase);
-    }
-
     private void StartBackgroundCycle()
     {
         if (_backgroundImages.Count == 0)
         {
+            BackgroundImage.Source = _currentSong?.ImagePath is { } titlePath && File.Exists(titlePath)
+                ? new BitmapImage(new Uri(titlePath))
+                : null;
             return;
         }
 

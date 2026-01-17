@@ -8,12 +8,7 @@
         MouseDown="OnMouseDown">
   <Grid Margin="24">
     <Grid>
-      <Grid.RowDefinitions>
-        <RowDefinition Height="*" />
-        <RowDefinition Height="220" />
-      </Grid.RowDefinitions>
-
-      <Border Grid.Row="0" CornerRadius="16" Background="#FF050505" BorderBrush="#FF2A2A2A" BorderThickness="1">
+      <Border CornerRadius="16" Background="#FF050505" BorderBrush="#FF2A2A2A" BorderThickness="1">
         <Grid>
           <Image x:Name="BackgroundImage" Stretch="UniformToFill" Opacity="0.6" />
           <Grid Margin="24">
@@ -90,8 +85,7 @@
         </Grid>
       </Border>
 
-      <TextBlock Grid.Row="0"
-                 x:Name="GetReadyText"
+      <TextBlock x:Name="GetReadyText"
                  Text="GET READY"
                  FontSize="52"
                  FontWeight="SemiBold"
@@ -100,8 +94,7 @@
                  VerticalAlignment="Center"
                  Visibility="Collapsed"
                  Panel.ZIndex="6" />
-      <TextBlock Grid.Row="0"
-                 x:Name="CountdownText"
+      <TextBlock x:Name="CountdownText"
                  FontSize="72"
                  FontWeight="Bold"
                  Foreground="White"
@@ -109,14 +102,12 @@
                  VerticalAlignment="Center"
                  Visibility="Collapsed"
                  Panel.ZIndex="6" />
-      <Border Grid.Row="0"
-              Background="#AA000000"
+      <Border Background="#AA000000"
               Visibility="Collapsed"
               x:Name="FailureOverlay"
               CornerRadius="16"
               Panel.ZIndex="5" />
-      <TextBlock Grid.Row="0"
-                 x:Name="FailedText"
+      <TextBlock x:Name="FailedText"
                  Text="FAILED"
                  FontSize="64"
                  FontWeight="Bold"
@@ -125,8 +116,7 @@
                  VerticalAlignment="Center"
                  Visibility="Collapsed"
                  Panel.ZIndex="8" />
-      <StackPanel Grid.Row="0"
-                  x:Name="FinalScorePanel"
+      <StackPanel x:Name="FinalScorePanel"
                   Visibility="Collapsed"
                   HorizontalAlignment="Center"
                   VerticalAlignment="Center"
@@ -166,13 +156,6 @@
                    HorizontalAlignment="Center" />
       </StackPanel>
 
-      <Border Grid.Row="1" Margin="0,20,0,0" Background="{StaticResource PanelBrush}" BorderBrush="{StaticResource PanelBorderBrush}" BorderThickness="1" CornerRadius="12" Padding="16">
-        <StackPanel>
-          <TextBlock Text="How to Add Your Own Songs" FontSize="18" Foreground="White" FontWeight="SemiBold" />
-          <TextBlock Margin="0,8,0,0" Foreground="#FFB0B0B0" TextWrapping="Wrap"
-                     Text="1. Copy MP3 files into the Assets/Songs folder.&#x0a;2. Copy background images into Assets/Images.&#x0a;3. Give the image the same filename as the MP3 for auto matching." />
-        </StackPanel>
-      </Border>
     </Grid>
   </Grid>
 </Window>

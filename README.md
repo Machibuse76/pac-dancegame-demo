@@ -4,13 +4,14 @@ A lightweight C# WPF dance-dance style demo that plays MP3s, shows background im
 
 ## Features
 - Auto-discovers MP3s dropped into `Assets/Songs`.
-- Auto-matches background images from `Assets/Images` by filename and cycles through the image folder.
+- Loads each song from its own folder in `Assets/Songs` and cycles background images from that folder.
 - Adjustable BPM, scrolling arrows, and hit-based scoring.
 
 ## Adding your own MP3s and images
-1. Copy MP3 files into `Assets/Songs`.
-2. Copy images (PNG/JPG) into `Assets/Images`.
-3. Match filenames for auto pairing (example: `song.mp3` + `song.png`).
+1. Create a folder per song in `Assets/Songs` (for example `Assets/Songs/MySong`).
+2. Copy an MP3 into that folder.
+3. Add `title.png` in the same folder for the song title image.
+4. Add any additional PNG/JPG images in the folder for background cycling.
 
 ## Running the app
 ```bash
