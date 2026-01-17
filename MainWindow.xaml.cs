@@ -86,9 +86,7 @@ public partial class MainWindow : Window
 
     private void LoadSongs()
     {
-        var basePath = AppContext.BaseDirectory;
-        var songPath = IOPath.Combine(basePath, "Assets", "Songs");
-
+        var songPath = ResolveSongsPath();
         Directory.CreateDirectory(songPath);
 
         _songs.Clear();
@@ -139,6 +137,30 @@ public partial class MainWindow : Window
             ImagePath = File.Exists(titleImage) ? titleImage : null,
             BackgroundImages = images
         };
+    }
+
+    private static string ResolveSongsPath()
+    {
+        var basePath = AppContext.BaseDirectory;
+        var directPath = IOPath.Combine(basePath, "Assets", "Songs");
+        if (Directory.Exists(directPath))
+        {
+            return directPath;
+        }
+
+        var current = new DirectoryInfo(basePath);
+        while (current is not null)
+        {
+            var candidate = IOPath.Combine(current.FullName, "Assets", "Songs");
+            if (Directory.Exists(candidate))
+            {
+                return candidate;
+            }
+
+            current = current.Parent;
+        }
+
+        return directPath;
     }
 
     private void SetCurrentSong(SongItem song)
