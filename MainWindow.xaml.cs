@@ -6,6 +6,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Media.Effects;
+using System.Windows.Shapes;
 using System.Windows.Threading;
 using PacDancegameDemo.Models;
 
@@ -28,6 +29,7 @@ public partial class MainWindow : Window
     private readonly Brush _goodBrush = new SolidColorBrush(Color.FromRgb(0xB0, 0xFF, 0xB0));
     private readonly Brush _poorBrush = new SolidColorBrush(Color.FromRgb(0xFF, 0xB0, 0xB0));
     private readonly List<ArrowNote> _activeNotes = new();
+    private readonly Dictionary<int, ArrowNote> _activeHolds = new();
     private int _score;
     private int _perfectCount;
     private int _goodCount;
@@ -193,7 +195,7 @@ public partial class MainWindow : Window
 
     private void BeatTimerOnTick(object? sender, EventArgs e)
     {
-        SpawnArrow();
+        SpawnBeatNotes();
     }
 
     private void OnPreviewKeyDown(object sender, KeyEventArgs e)
@@ -216,6 +218,26 @@ public partial class MainWindow : Window
         e.Handled = true;
     }
 
+    private void OnPreviewKeyUp(object sender, KeyEventArgs e)
+    {
+        var lane = e.Key switch
+        {
+            Key.Left => 0,
+            Key.Down => 1,
+            Key.Up => 2,
+            Key.Right => 3,
+            _ => -1
+        };
+
+        if (lane < 0)
+        {
+            return;
+        }
+
+        HandleHoldRelease(lane);
+        e.Handled = true;
+    }
+
     private void BpmSliderOnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
     {
         UpdateBpm();
@@ -228,6 +250,15 @@ public partial class MainWindow : Window
     private void UpdateBpm()
     {
         BpmValue.Text = $"{BpmSlider.Value:0} BPM";
+    }
+
+    private void SpawnBeatNotes()
+    {
+        SpawnArrow();
+        if (_random.NextDouble() < 0.25)
+        {
+            SpawnArrow();
+        }
     }
 
     private void SpawnArrow()
@@ -255,11 +286,29 @@ public partial class MainWindow : Window
             Height = arrowSize
         };
 
+        var isHold = _random.NextDouble() < 0.2;
+        Rectangle? trail = null;
+        if (isHold)
+        {
+            var trailHeight = Math.Max(arrowSize * 2, ArrowCanvas.ActualHeight * 0.25);
+            trail = new Rectangle
+            {
+                Width = arrowSize * 0.3,
+                Height = trailHeight,
+                Fill = new SolidColorBrush(Color.FromArgb(160, 0x3D, 0xDC, 0xFF)),
+                RadiusX = 6,
+                RadiusY = 6
+            };
+            Canvas.SetLeft(trail, xOffset + (arrowSize - trail.Width) / 2);
+            Canvas.SetTop(trail, ArrowCanvas.ActualHeight + arrowSize + (arrowSize / 2));
+            ArrowCanvas.Children.Add(trail);
+        }
+
         Canvas.SetLeft(arrow, xOffset);
         Canvas.SetTop(arrow, ArrowCanvas.ActualHeight + arrowSize);
         ArrowCanvas.Children.Add(arrow);
 
-        var note = new ArrowNote(arrow, lane);
+        var note = new ArrowNote(arrow, lane, isHold, trail);
         _activeNotes.Add(note);
         _totalArrowsSpawned += 1;
 
@@ -273,8 +322,13 @@ public partial class MainWindow : Window
             EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseInOut }
         };
 
-        animation.Completed += (_, _) => RegisterMiss(note);
+        animation.Completed += (_, _) => HandleNoteCompletion(note);
         arrow.BeginAnimation(Canvas.TopProperty, animation);
+
+        if (trail is not null)
+        {
+            trail.BeginAnimation(Canvas.TopProperty, animation);
+        }
     }
 
     private void HandleHit(int lane)
@@ -294,6 +348,18 @@ public partial class MainWindow : Window
         if (candidate is null || candidate.distance > GoodWindow)
         {
             RegisterPoor(lane);
+            return;
+        }
+
+        if (candidate.note.IsHold)
+        {
+            if (candidate.note.IsHolding)
+            {
+                return;
+            }
+
+            _activeHolds[lane] = candidate.note;
+            candidate.note.IsHolding = true;
             return;
         }
 
@@ -321,17 +387,63 @@ public partial class MainWindow : Window
         UpdateScoreboard();
     }
 
+    private void HandleHoldRelease(int lane)
+    {
+        if (!_activeHolds.TryGetValue(lane, out var note))
+        {
+            return;
+        }
+
+        _activeHolds.Remove(lane);
+        note.IsHolding = false;
+
+        var middle = ArrowCanvas.ActualHeight / 2;
+        var distance = Math.Abs(GetNoteCenterY(note) - middle);
+
+        if (distance <= PerfectWindow)
+        {
+            _perfectCount += 1;
+            _perfectStreak += 1;
+            if (_perfectStreak % 5 == 0)
+            {
+                _perfectMultiplier += 1;
+            }
+
+            _score += 100 * _perfectMultiplier;
+            ShowHitResult("Perfect", _perfectBrush, lane);
+        }
+        else if (distance <= GoodWindow)
+        {
+            _goodCount += 1;
+            _score += 50;
+            ResetPerfectStreak();
+            ShowHitResult("Good", _goodBrush, lane);
+        }
+        else
+        {
+            RegisterPoor(lane);
+        }
+
+        RemoveNote(note);
+        UpdateScoreboard();
+    }
+
     private double GetNoteCenterY(ArrowNote note)
     {
         var position = note.Element.TranslatePoint(new Point(0, 0), ArrowCanvas);
         return position.Y + note.Element.ActualHeight / 2;
     }
 
-    private void RegisterMiss(ArrowNote note)
+    private void HandleNoteCompletion(ArrowNote note)
     {
         if (!_activeNotes.Contains(note))
         {
             return;
+        }
+
+        if (note.IsHold)
+        {
+            _activeHolds.Remove(note.Lane);
         }
 
         RegisterPoor(note.Lane);
@@ -355,11 +467,16 @@ public partial class MainWindow : Window
     {
         _activeNotes.Remove(note);
         ArrowCanvas.Children.Remove(note.Element);
+        if (note.Trail is not null)
+        {
+            ArrowCanvas.Children.Remove(note.Trail);
+        }
     }
 
     private void ClearActiveNotes()
     {
         _activeNotes.Clear();
+        _activeHolds.Clear();
     }
 
     private void UpdateScoreboard()
@@ -627,5 +744,20 @@ public partial class MainWindow : Window
         return LaneGrid.ActualWidth / LaneCount;
     }
 
-    private sealed record ArrowNote(TextBlock Element, int Lane);
+    private sealed class ArrowNote
+    {
+        public ArrowNote(TextBlock element, int lane, bool isHold, Rectangle? trail)
+        {
+            Element = element;
+            Lane = lane;
+            IsHold = isHold;
+            Trail = trail;
+        }
+
+        public TextBlock Element { get; }
+        public int Lane { get; }
+        public bool IsHold { get; }
+        public Rectangle? Trail { get; }
+        public bool IsHolding { get; set; }
+    }
 }

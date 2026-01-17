@@ -4,6 +4,7 @@
         Title="Pac Dancegame Demo" Height="720" Width="1200" Background="#FF101010"
         Focusable="True"
         PreviewKeyDown="OnPreviewKeyDown"
+        PreviewKeyUp="OnPreviewKeyUp"
         MouseDown="OnMouseDown">
   <Grid Margin="24">
     <Grid.ColumnDefinitions>
