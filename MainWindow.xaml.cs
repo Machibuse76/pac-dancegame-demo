@@ -41,6 +41,8 @@ public partial class MainWindow : Window
     private int _backgroundIndex = -1;
     private int _totalArrowsSpawned;
     private int _countdownValue;
+    private readonly List<SongItem> _songs = new();
+    private int _songIndex;
     private SongItem? _currentSong;
 
     public MainWindow()
@@ -50,9 +52,10 @@ public partial class MainWindow : Window
         _accentBrush = (Brush)Application.Current.Resources["AccentBrush"];
         _player.MediaEnded += OnMediaEnded;
 
-        SongList.SelectionChanged += SongListOnSelectionChanged;
         PlayButton.Click += PlayButtonOnClick;
         StopButton.Click += StopButtonOnClick;
+        PrevSongButton.Click += PrevSongButtonOnClick;
+        NextSongButton.Click += NextSongButtonOnClick;
         BpmSlider.ValueChanged += BpmSliderOnValueChanged;
 
         _beatTimer.Tick += BeatTimerOnTick;
@@ -83,45 +86,45 @@ public partial class MainWindow : Window
     private void LoadSongs()
     {
         var basePath = AppContext.BaseDirectory;
-        var songPath = System.IO.Path.Combine(basePath, "Assets", "Songs");
-        var imagePath = System.IO.Path.Combine(basePath, "Assets", "Images");
+        var songPath = Path.Combine(basePath, "Assets", "Songs");
+        var imagePath = Path.Combine(basePath, "Assets", "Images");
 
         Directory.CreateDirectory(songPath);
         Directory.CreateDirectory(imagePath);
 
         LoadBackgroundImages(imagePath);
 
-        var songs = Directory.GetFiles(songPath, "*.mp3")
+        _songs.Clear();
+        _songs.AddRange(Directory.GetFiles(songPath, "*.mp3")
             .Select(file => new SongItem
             {
-                Name = System.IO.Path.GetFileNameWithoutExtension(file),
+                Name = Path.GetFileNameWithoutExtension(file),
                 FilePath = file,
                 ImagePath = FindMatchingImage(imagePath, file)
             })
             .OrderBy(song => song.Name)
-            .ToList();
+            .ToList());
 
-        SongList.ItemsSource = songs;
-        SongList.DisplayMemberPath = nameof(SongItem.Name);
-
-        if (songs.Count > 0)
+        if (_songs.Count > 0)
         {
-            SongList.SelectedIndex = 0;
+            _songIndex = 0;
+            SetCurrentSong(_songs[_songIndex]);
         }
         else
         {
             NowPlaying.Text = "No songs found";
+            SongPreviewTitle.Text = "No songs found";
         }
     }
 
     private static string? FindMatchingImage(string imageRoot, string songFilePath)
     {
-        var baseName = System.IO.Path.GetFileNameWithoutExtension(songFilePath);
+        var baseName = Path.GetFileNameWithoutExtension(songFilePath);
         var possibleExtensions = new[] { ".png", ".jpg", ".jpeg" };
 
         foreach (var extension in possibleExtensions)
         {
-            var candidate = System.IO.Path.Combine(imageRoot, baseName + extension);
+            var candidate = Path.Combine(imageRoot, baseName + extension);
             if (File.Exists(candidate))
             {
                 return candidate;
@@ -129,29 +132,49 @@ public partial class MainWindow : Window
         }
 
         return Directory.GetFiles(imageRoot)
-            .FirstOrDefault(file => possibleExtensions.Contains(System.IO.Path.GetExtension(file), StringComparer.OrdinalIgnoreCase));
+            .FirstOrDefault(file => possibleExtensions.Contains(Path.GetExtension(file), StringComparer.OrdinalIgnoreCase));
     }
 
-    private void SongListOnSelectionChanged(object sender, SelectionChangedEventArgs e)
+    private void SetCurrentSong(SongItem song)
     {
-        if (SongList.SelectedItem is not SongItem song)
-        {
-            return;
-        }
-
         _currentSong = song;
         NowPlaying.Text = song.Name;
+        SongPreviewTitle.Text = song.Name;
 
         if (!string.IsNullOrWhiteSpace(song.ImagePath) && File.Exists(song.ImagePath))
         {
             BackgroundImage.Source = new BitmapImage(new Uri(song.ImagePath));
             _backgroundIndex = _backgroundImages.FindIndex(path =>
                 string.Equals(path, song.ImagePath, StringComparison.OrdinalIgnoreCase));
+            SongPreviewImage.Source = new BitmapImage(new Uri(song.ImagePath));
         }
         else
         {
             BackgroundImage.Source = null;
+            SongPreviewImage.Source = null;
         }
+    }
+
+    private void PrevSongButtonOnClick(object sender, RoutedEventArgs e)
+    {
+        if (_songs.Count == 0)
+        {
+            return;
+        }
+
+        _songIndex = (_songIndex - 1 + _songs.Count) % _songs.Count;
+        SetCurrentSong(_songs[_songIndex]);
+    }
+
+    private void NextSongButtonOnClick(object sender, RoutedEventArgs e)
+    {
+        if (_songs.Count == 0)
+        {
+            return;
+        }
+
+        _songIndex = (_songIndex + 1) % _songs.Count;
+        SetCurrentSong(_songs[_songIndex]);
     }
 
     private void PlayButtonOnClick(object sender, RoutedEventArgs e)
@@ -345,7 +368,7 @@ public partial class MainWindow : Window
             .OrderBy(result => result.distance)
             .FirstOrDefault();
 
-        if (candidate is null || candidate.distance > GoodWindow)
+        if (candidate is null)
         {
             RegisterPoor(lane);
             return;
@@ -358,8 +381,19 @@ public partial class MainWindow : Window
                 return;
             }
 
+            if (candidate.distance > GoodWindow)
+            {
+                return;
+            }
+
             _activeHolds[lane] = candidate.note;
             candidate.note.IsHolding = true;
+            return;
+        }
+
+        if (candidate.distance > GoodWindow)
+        {
+            RegisterPoor(lane);
             return;
         }
 
