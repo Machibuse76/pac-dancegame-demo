@@ -138,7 +138,7 @@
                   VerticalAlignment="Center"
                   Panel.ZIndex="7"
                   Background="#88000000"
-                  Padding="24">
+                  >
         <TextBlock x:Name="FinalScoreTitle"
                    Text="FINAL RESULTS"
                    FontSize="28"
