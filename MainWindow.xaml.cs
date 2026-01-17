@@ -186,6 +186,7 @@ public partial class MainWindow : Window
         }
 
         ResetFailureState();
+        SongCarouselPanel.Visibility = Visibility.Collapsed;
         _player.Open(new Uri(_currentSong.FilePath));
         _player.Play();
         StartBackgroundCycle();
@@ -206,6 +207,7 @@ public partial class MainWindow : Window
         HideCountdown();
         ResetFailureState();
         ResetSessionStats();
+        SongCarouselPanel.Visibility = Visibility.Visible;
     }
 
     private void StartBeatTimer()
@@ -666,6 +668,8 @@ public partial class MainWindow : Window
         {
             ShowFinalResults(failed);
         }
+
+        SongCarouselPanel.Visibility = Visibility.Visible;
     }
 
     private void FailureDisplayTimerOnTick(object? sender, EventArgs e)

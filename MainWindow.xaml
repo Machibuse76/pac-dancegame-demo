@@ -28,7 +28,7 @@
                 <TextBlock Text=" • " Foreground="#FFB0B0B0" Margin="8,0" />
                 <TextBlock x:Name="NowPlaying" Foreground="#FFB0B0B0" FontSize="18" />
               </StackPanel>
-              <Border Background="#33000000" CornerRadius="12" Padding="12" Margin="0,12,0,0">
+              <Border x:Name="SongCarouselPanel" Background="#33000000" CornerRadius="12" Padding="12" Margin="0,12,0,0">
                 <Grid>
                   <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
