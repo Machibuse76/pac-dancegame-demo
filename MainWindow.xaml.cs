@@ -1,4 +1,5 @@
 using System.IO;
+using IOPath = System.IO.Path;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -86,8 +87,8 @@ public partial class MainWindow : Window
     private void LoadSongs()
     {
         var basePath = AppContext.BaseDirectory;
-        var songPath = Path.Combine(basePath, "Assets", "Songs");
-        var imagePath = Path.Combine(basePath, "Assets", "Images");
+        var songPath = IOPath.Combine(basePath, "Assets", "Songs");
+        var imagePath = IOPath.Combine(basePath, "Assets", "Images");
 
         Directory.CreateDirectory(songPath);
         Directory.CreateDirectory(imagePath);
@@ -98,7 +99,7 @@ public partial class MainWindow : Window
         _songs.AddRange(Directory.GetFiles(songPath, "*.mp3")
             .Select(file => new SongItem
             {
-                Name = Path.GetFileNameWithoutExtension(file),
+                Name = IOPath.GetFileNameWithoutExtension(file),
                 FilePath = file,
                 ImagePath = FindMatchingImage(imagePath, file)
             })
@@ -119,12 +120,12 @@ public partial class MainWindow : Window
 
     private static string? FindMatchingImage(string imageRoot, string songFilePath)
     {
-        var baseName = Path.GetFileNameWithoutExtension(songFilePath);
+        var baseName = IOPath.GetFileNameWithoutExtension(songFilePath);
         var possibleExtensions = new[] { ".png", ".jpg", ".jpeg" };
 
         foreach (var extension in possibleExtensions)
         {
-            var candidate = Path.Combine(imageRoot, baseName + extension);
+            var candidate = IOPath.Combine(imageRoot, baseName + extension);
             if (File.Exists(candidate))
             {
                 return candidate;
@@ -132,7 +133,7 @@ public partial class MainWindow : Window
         }
 
         return Directory.GetFiles(imageRoot)
-            .FirstOrDefault(file => possibleExtensions.Contains(Path.GetExtension(file), StringComparer.OrdinalIgnoreCase));
+            .FirstOrDefault(file => possibleExtensions.Contains(IOPath.GetExtension(file), StringComparer.OrdinalIgnoreCase));
     }
 
     private void SetCurrentSong(SongItem song)
