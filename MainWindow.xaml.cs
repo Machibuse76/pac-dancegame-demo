@@ -71,7 +71,7 @@ public partial class MainWindow : Window
         _countdownTimer.Tick += CountdownTimerOnTick;
         _resultsDisplayTimer.Interval = TimeSpan.FromSeconds(15);
         _resultsDisplayTimer.Tick += ResultsDisplayTimerOnTick;
-        _previewTimer.Interval = TimeSpan.FromSeconds(15);
+        _previewTimer.Interval = TimeSpan.FromSeconds(30);
         _previewTimer.Tick += PreviewTimerOnTick;
         Loaded += OnLoaded;
         LoadSongs();
@@ -246,6 +246,13 @@ public partial class MainWindow : Window
 
     private void OnPreviewKeyDown(object sender, KeyEventArgs e)
     {
+        if (e.Key == Key.Q)
+        {
+            Close();
+            e.Handled = true;
+            return;
+        }
+
         if (!_isPlaying && (e.Key == Key.Enter || e.Key == Key.Space || e.Key == Key.D1 || e.Key == Key.NumPad1))
         {
             StartGame();
@@ -947,7 +954,7 @@ public partial class MainWindow : Window
 
     private void PreviewTimerOnTick(object? sender, EventArgs e)
     {
-        StopPreview();
+        StartPreviewIfIdle();
     }
 
     private void StopPreview()

@@ -37,14 +37,16 @@
                       Padding="32"
                       Margin="0,80,0,0"
                       HorizontalAlignment="Center"
-                      Width="1440">
+                      Width="1560">
                 <Grid>
                   <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="560" />
-                    <ColumnDefinition Width="880" />
+                    <ColumnDefinition Width="1000" />
                   </Grid.ColumnDefinitions>
                   <StackPanel HorizontalAlignment="Center" Margin="0,20,0,0">
-                    <Image x:Name="SongPreviewImage" Width="360" Height="360" Stretch="UniformToFill" Margin="0,0,0,16" />
+                    <Border BorderBrush="#66FFFFFF" BorderThickness="2" CornerRadius="16" Margin="0,0,0,16">
+                      <Image x:Name="SongPreviewImage" Width="360" Height="360" Stretch="UniformToFill" />
+                    </Border>
                     <TextBlock x:Name="SongPreviewTitle" FontSize="32" Foreground="White" HorizontalAlignment="Center" />
                     <ListBox x:Name="DifficultyList"
                              Height="200"
@@ -69,7 +71,7 @@
                         </Style>
                       </ListBox.Resources>
                     </ListBox>
-                    <TextBlock x:Name="PressStartText" Text="Press Start (1)" Foreground="#FFB0B0B0" Margin="0,16,0,0" FontSize="22" HorizontalAlignment="Center" />
+                    <TextBlock x:Name="PressStartText" Text="Press Start to Select" Foreground="#FFB0B0B0" Margin="0,16,0,0" FontSize="22" HorizontalAlignment="Center" />
                   </StackPanel>
                   <ListBox x:Name="SongList"
                            Grid.Column="1"
@@ -77,8 +79,9 @@
                            BorderBrush="#FF5A5A5A"
                            Foreground="White"
                            Height="560"
-                           Margin="60,0,0,0"
+                           Margin="40,0,0,0"
                            HorizontalContentAlignment="Stretch"
+                           Padding="24,0"
                            VerticalContentAlignment="Center"
                            ScrollViewer.VerticalScrollBarVisibility="Hidden">
                     <ListBox.ItemTemplate>
