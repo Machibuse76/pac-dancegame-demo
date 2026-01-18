@@ -24,6 +24,8 @@ public partial class MainWindow : Window
     private readonly DispatcherTimer _backgroundTimer = new();
     private readonly DispatcherTimer _countdownTimer = new();
     private readonly DispatcherTimer _failureDisplayTimer = new();
+    private readonly DispatcherTimer _previewTimer = new();
+    private readonly MediaPlayer _previewPlayer = new();
     private readonly Random _random = new();
     private readonly Brush _accentBrush;
     private readonly Brush _perfectBrush = new SolidColorBrush(Color.FromRgb(0x3D, 0xDC, 0xFF));
@@ -56,11 +58,10 @@ public partial class MainWindow : Window
         _accentBrush = (Brush)Application.Current.Resources["AccentBrush"];
         _player.MediaEnded += OnMediaEnded;
 
-        PrevSongButton.Click += PrevSongButtonOnClick;
-        NextSongButton.Click += NextSongButtonOnClick;
         EasyButton.Click += EasyButtonOnClick;
         StandardButton.Click += StandardButtonOnClick;
         ExpertButton.Click += ExpertButtonOnClick;
+        SongList.SelectionChanged += SongListOnSelectionChanged;
 
         _beatTimer.Tick += BeatTimerOnTick;
         _feedbackTimer.Interval = TimeSpan.FromSeconds(1);
@@ -71,6 +72,8 @@ public partial class MainWindow : Window
         _countdownTimer.Tick += CountdownTimerOnTick;
         _failureDisplayTimer.Interval = TimeSpan.FromSeconds(3);
         _failureDisplayTimer.Tick += FailureDisplayTimerOnTick;
+        _previewTimer.Interval = TimeSpan.FromSeconds(15);
+        _previewTimer.Tick += PreviewTimerOnTick;
         Loaded += OnLoaded;
         LoadSongs();
         UpdateBpm();
@@ -100,10 +103,14 @@ public partial class MainWindow : Window
             .OrderBy(song => song.Name)
             .ToList());
 
+        SongList.ItemsSource = _songs;
+        SongList.DisplayMemberPath = nameof(SongItem.Name);
+
         if (_songs.Count > 0)
         {
             _songIndex = 0;
             SetCurrentSong(_songs[_songIndex]);
+            SongList.SelectedIndex = 0;
         }
         else
         {
@@ -189,28 +196,19 @@ public partial class MainWindow : Window
         _backgroundImages.AddRange(song.BackgroundImages);
         _backgroundIndex = 0;
         _hasVideoBackground = !string.IsNullOrWhiteSpace(song.VideoPath) && File.Exists(song.VideoPath);
+
+        StartPreviewIfIdle();
     }
 
-    private void PrevSongButtonOnClick(object sender, RoutedEventArgs e)
+    private void SongListOnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (_songs.Count == 0)
+        if (SongList.SelectedItem is not SongItem song)
         {
             return;
         }
 
-        _songIndex = (_songIndex - 1 + _songs.Count) % _songs.Count;
-        SetCurrentSong(_songs[_songIndex]);
-    }
-
-    private void NextSongButtonOnClick(object sender, RoutedEventArgs e)
-    {
-        if (_songs.Count == 0)
-        {
-            return;
-        }
-
-        _songIndex = (_songIndex + 1) % _songs.Count;
-        SetCurrentSong(_songs[_songIndex]);
+        _songIndex = _songs.IndexOf(song);
+        SetCurrentSong(song);
     }
 
     private void StartGame()
@@ -223,6 +221,7 @@ public partial class MainWindow : Window
         ResetFailureState();
         SongCarouselPanel.Visibility = Visibility.Collapsed;
         _isPlaying = true;
+        StopPreview();
         _player.Open(new Uri(_currentSong.FilePath));
         _player.Play();
         StartBackgroundCycle();
@@ -322,22 +321,11 @@ public partial class MainWindow : Window
             return;
         }
 
-        var arrowGlyphs = new[] { "◀", "▼", "▲", "▶" };
         var lane = _random.Next(LaneCount);
         var arrowSize = Math.Min(56, laneWidth - 8);
         var xOffset = laneWidth * lane + (laneWidth - arrowSize) / 2;
 
-        var arrow = new TextBlock
-        {
-            Text = arrowGlyphs[lane],
-            FontSize = arrowSize,
-            FontFamily = new FontFamily("Segoe UI Symbol"),
-            Foreground = _accentBrush,
-            FontWeight = FontWeights.SemiBold,
-            TextAlignment = TextAlignment.Center,
-            Width = arrowSize,
-            Height = arrowSize
-        };
+        var arrow = CreateArrowShape(lane, arrowSize);
 
         var isHold = _random.NextDouble() < 0.2;
         Rectangle? trail = null;
@@ -710,6 +698,7 @@ public partial class MainWindow : Window
         _backgroundTimer.Stop();
         _countdownTimer.Stop();
         _failureDisplayTimer.Stop();
+        _previewTimer.Stop();
         StopArrowAnimations();
         ClearHitResult();
         HideCountdown();
@@ -729,6 +718,7 @@ public partial class MainWindow : Window
         }
 
         SongCarouselPanel.Visibility = Visibility.Visible;
+        StartPreviewIfIdle();
     }
 
     private void FailureDisplayTimerOnTick(object? sender, EventArgs e)
@@ -830,6 +820,33 @@ public partial class MainWindow : Window
         }
     }
 
+    private void StartPreviewIfIdle()
+    {
+        if (_isPlaying || _currentSong is null)
+        {
+            return;
+        }
+
+        StopPreview();
+        _previewPlayer.Open(new Uri(_currentSong.FilePath));
+        _previewPlayer.Position = TimeSpan.Zero;
+        _previewPlayer.Play();
+        _previewTimer.Stop();
+        _previewTimer.Start();
+    }
+
+    private void PreviewTimerOnTick(object? sender, EventArgs e)
+    {
+        StopPreview();
+    }
+
+    private void StopPreview()
+    {
+        _previewTimer.Stop();
+        _previewPlayer.Stop();
+        _previewPlayer.Close();
+    }
+
     private void ShowFinalResults(bool failed)
     {
         var maxScore = _totalArrowsSpawned * 100;
@@ -867,9 +884,48 @@ public partial class MainWindow : Window
         return LaneGrid.ActualWidth / LaneCount;
     }
 
+    private FrameworkElement CreateArrowShape(int lane, double size)
+    {
+        var geometry = Geometry.Parse("M 50,0 100,50 75,50 75,100 25,100 25,50 0,50 Z");
+        var path = new Path
+        {
+            Data = geometry,
+            Width = size,
+            Height = size,
+            Stretch = Stretch.Fill,
+            Stroke = Brushes.White,
+            StrokeThickness = 3,
+            Fill = new LinearGradientBrush(
+                Color.FromRgb(0xB7, 0x4C, 0xFF),
+                Color.FromRgb(0x2F, 0xB7, 0xFF),
+                new Point(0, 0),
+                new Point(1, 1))
+        };
+
+        var outline = new DropShadowEffect
+        {
+            Color = Colors.Black,
+            BlurRadius = 6,
+            ShadowDepth = 0,
+            Opacity = 0.6
+        };
+        path.Effect = outline;
+
+        var angle = lane switch
+        {
+            0 => -90,
+            1 => 180,
+            2 => 0,
+            3 => 90,
+            _ => 0
+        };
+        path.RenderTransform = new RotateTransform(angle, size / 2, size / 2);
+        return path;
+    }
+
     private sealed class ArrowNote
     {
-        public ArrowNote(TextBlock element, int lane, bool isHold, Rectangle? trail)
+        public ArrowNote(FrameworkElement element, int lane, bool isHold, Rectangle? trail)
         {
             Element = element;
             Lane = lane;
@@ -877,7 +933,7 @@ public partial class MainWindow : Window
             Trail = trail;
         }
 
-        public TextBlock Element { get; }
+        public FrameworkElement Element { get; }
         public int Lane { get; }
         public bool IsHold { get; }
         public Rectangle? Trail { get; }
