@@ -344,7 +344,7 @@ public partial class MainWindow : Window
         }
 
         var lane = _random.Next(LaneCount);
-        var arrowSize = Math.Min(56, laneWidth - 8);
+        var arrowSize = Math.Min(90, laneWidth - 8);
         var xOffset = laneWidth * lane + (laneWidth - arrowSize) / 2;
 
         var arrow = CreateArrowShape(lane, arrowSize);
@@ -353,10 +353,10 @@ public partial class MainWindow : Window
         Rectangle? trail = null;
         if (isHold)
         {
-            var trailHeight = Math.Max(arrowSize * 2, ArrowCanvas.ActualHeight * 0.25);
+            var trailHeight = Math.Max(arrowSize * 2.6, ArrowCanvas.ActualHeight * 0.3);
             trail = new Rectangle
             {
-                Width = arrowSize * 0.3,
+                Width = arrowSize * 0.35,
                 Height = trailHeight,
                 Fill = new SolidColorBrush(Color.FromArgb(160, 0x3D, 0xDC, 0xFF)),
                 RadiusX = 6,
