@@ -104,7 +104,10 @@ public partial class MainWindow : Window
             .ToList());
 
         SongList.ItemsSource = _songs;
-        SongList.DisplayMemberPath = nameof(SongItem.Name);
+        if (SongList.ItemTemplate is null)
+        {
+            SongList.DisplayMemberPath = nameof(SongItem.Name);
+        }
 
         if (_songs.Count > 0)
         {
@@ -948,7 +951,7 @@ public partial class MainWindow : Window
     private FrameworkElement CreateArrowShape(int lane, double size)
     {
         var geometry = Geometry.Parse("M 50,0 100,50 75,50 75,100 25,100 25,50 0,50 Z");
-        var path = new Path
+        var path = new System.Windows.Shapes.Path
         {
             Data = geometry,
             Width = size,
