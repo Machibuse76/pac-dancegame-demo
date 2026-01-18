@@ -78,14 +78,23 @@
                            Foreground="White"
                            Height="560"
                            Margin="60,0,0,0"
-                           HorizontalContentAlignment="Right"
+                           HorizontalContentAlignment="Stretch"
                            VerticalContentAlignment="Center"
                            ScrollViewer.VerticalScrollBarVisibility="Hidden">
+                    <ListBox.ItemTemplate>
+                      <DataTemplate>
+                        <TextBlock Text="{Binding Name}"
+                                   TextAlignment="Right"
+                                   TextTrimming="CharacterEllipsis"
+                                   TextWrapping="NoWrap" />
+                      </DataTemplate>
+                    </ListBox.ItemTemplate>
                     <ListBox.Resources>
                       <Style TargetType="ListBoxItem">
-                        <Setter Property="HorizontalContentAlignment" Value="Right" />
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                         <Setter Property="Padding" Value="22,10" />
                         <Setter Property="FontSize" Value="22" />
+                        <Setter Property="FontFamily" Value="Segoe UI Semibold" />
                         <Setter Property="Opacity" Value="0.2" />
                         <Setter Property="Foreground" Value="#FFB0B0B0" />
                         <Setter Property="RenderTransformOrigin" Value="1,0.5" />
@@ -181,13 +190,14 @@
                   HorizontalAlignment="Center"
                   VerticalAlignment="Top"
                   Margin="0,12,0,0"
-                  Panel.ZIndex="6">
-        <TextBlock x:Name="ScoreText" Text="Score: 0" Foreground="White" FontSize="24" HorizontalAlignment="Center" />
+                  Panel.ZIndex="6"
+                  Visibility="Collapsed">
+        <TextBlock x:Name="ScoreText" Text="Score: 0" Foreground="White" FontSize="30" HorizontalAlignment="Center" />
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,8,0,0">
-          <TextBlock x:Name="PerfectText" Text="Perfect: 0" Foreground="#FF3DDCFF" FontSize="20" Margin="0,0,16,0" />
-          <TextBlock x:Name="PerfectMultiplierText" Text="x1" Foreground="#FF7EEBFF" FontSize="18" Margin="0,0,16,0" VerticalAlignment="Center" />
-          <TextBlock x:Name="GoodText" Text="Good: 0" Foreground="#FFB0FFB0" FontSize="20" Margin="0,0,16,0" />
-          <TextBlock x:Name="PoorText" Text="Poor: 0" Foreground="#FFFFB0B0" FontSize="20" />
+          <TextBlock x:Name="PerfectText" Text="Perfect: 0" Foreground="#FF3DDCFF" FontSize="24" Margin="0,0,16,0" />
+          <TextBlock x:Name="PerfectMultiplierText" Text="x1" Foreground="#FF7EEBFF" FontSize="20" Margin="0,0,16,0" VerticalAlignment="Center" />
+          <TextBlock x:Name="GoodText" Text="Good: 0" Foreground="#FFB0FFB0" FontSize="24" Margin="0,0,16,0" />
+          <TextBlock x:Name="PoorText" Text="Poor: 0" Foreground="#FFFFB0B0" FontSize="24" />
         </StackPanel>
       </StackPanel>
       <StackPanel x:Name="FinalScorePanel"

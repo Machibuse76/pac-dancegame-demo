@@ -220,6 +220,7 @@ public partial class MainWindow : Window
 
         ResetFailureState();
         SongCarouselPanel.Visibility = Visibility.Collapsed;
+        ScorePanel.Visibility = Visibility.Visible;
         _isPlaying = true;
         StopPreview();
         _player.Open(new Uri(_currentSong.FilePath));
@@ -737,6 +738,7 @@ public partial class MainWindow : Window
             ShowFinalResults(failed);
         }
 
+        ScorePanel.Visibility = Visibility.Collapsed;
         SongCarouselPanel.Visibility = Visibility.Visible;
         StartPreviewIfIdle();
     }
