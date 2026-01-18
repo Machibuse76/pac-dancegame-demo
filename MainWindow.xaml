@@ -26,7 +26,7 @@
             </Grid.RowDefinitions>
 
             <StackPanel Grid.Row="0" VerticalAlignment="Top" Margin="0,40,0,0">
-              <StackPanel Orientation="Horizontal">
+              <StackPanel x:Name="NowPlayingPanel" Orientation="Horizontal" Visibility="Collapsed">
                 <TextBlock Text="Now Playing" Foreground="White" FontSize="22" FontWeight="SemiBold" />
                 <TextBlock Text=" • " Foreground="#FFB0B0B0" Margin="8,0" />
                 <TextBlock x:Name="NowPlaying" Foreground="#FFB0B0B0" FontSize="18" />
@@ -37,11 +37,11 @@
                       Padding="32"
                       Margin="0,80,0,0"
                       HorizontalAlignment="Center"
-                      Width="1320">
+                      Width="1440">
                 <Grid>
                   <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="560" />
-                    <ColumnDefinition Width="760" />
+                    <ColumnDefinition Width="880" />
                   </Grid.ColumnDefinitions>
                   <StackPanel HorizontalAlignment="Center" Margin="0,20,0,0">
                     <Image x:Name="SongPreviewImage" Width="360" Height="360" Stretch="UniformToFill" Margin="0,0,0,16" />
@@ -86,7 +86,10 @@
                         <TextBlock Text="{Binding Name}"
                                    TextAlignment="Right"
                                    TextTrimming="CharacterEllipsis"
-                                   TextWrapping="NoWrap" />
+                                   TextWrapping="Wrap"
+                                   LineStackingStrategy="BlockLineHeight"
+                                   LineHeight="38"
+                                   MaxHeight="76" />
                       </DataTemplate>
                     </ListBox.ItemTemplate>
                     <ListBox.Resources>

@@ -69,7 +69,7 @@ public partial class MainWindow : Window
         _backgroundTimer.Tick += BackgroundTimerOnTick;
         _countdownTimer.Interval = TimeSpan.FromSeconds(1);
         _countdownTimer.Tick += CountdownTimerOnTick;
-        _resultsDisplayTimer.Interval = TimeSpan.FromSeconds(30);
+        _resultsDisplayTimer.Interval = TimeSpan.FromSeconds(15);
         _resultsDisplayTimer.Tick += ResultsDisplayTimerOnTick;
         _previewTimer.Interval = TimeSpan.FromSeconds(15);
         _previewTimer.Tick += PreviewTimerOnTick;
@@ -220,6 +220,7 @@ public partial class MainWindow : Window
         ResetFailureState();
         SongCarouselPanel.Visibility = Visibility.Collapsed;
         ScorePanel.Visibility = Visibility.Visible;
+        NowPlayingPanel.Visibility = Visibility.Visible;
         _isPlaying = true;
         StopPreview();
         _resultsDisplayTimer.Stop();
@@ -727,12 +728,13 @@ public partial class MainWindow : Window
         if (failed)
         {
             FailureOverlay.Visibility = Visibility.Visible;
-            FailedText.Visibility = Visibility.Visible;
             BackgroundImage.Opacity = 0.25;
+            FailedText.Visibility = showResults ? Visibility.Collapsed : Visibility.Visible;
         }
 
         if (showResults)
         {
+            NowPlayingPanel.Visibility = Visibility.Collapsed;
             ShowFinalResults(failed);
             _resultsDisplayTimer.Start();
         }
@@ -740,6 +742,7 @@ public partial class MainWindow : Window
         ScorePanel.Visibility = Visibility.Collapsed;
         if (!showResults)
         {
+            NowPlayingPanel.Visibility = Visibility.Collapsed;
             SongCarouselPanel.Visibility = Visibility.Visible;
             StartPreviewIfIdle();
         }
@@ -752,6 +755,7 @@ public partial class MainWindow : Window
         FailedText.Visibility = Visibility.Collapsed;
         FinalScorePanel.Visibility = Visibility.Collapsed;
         BackgroundImage.Opacity = 0.6;
+        NowPlayingPanel.Visibility = Visibility.Collapsed;
         SongCarouselPanel.Visibility = Visibility.Visible;
         StartPreviewIfIdle();
     }
