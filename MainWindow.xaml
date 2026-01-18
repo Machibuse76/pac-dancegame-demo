@@ -140,7 +140,10 @@
               <Border Grid.Column="1" BorderBrush="#33FFFFFF" BorderThickness="0,0,1,0" />
               <Border Grid.Column="2" BorderBrush="#33FFFFFF" BorderThickness="0,0,1,0" />
               <Border Grid.Column="3" BorderBrush="#33FFFFFF" BorderThickness="0,0,0,0" />
-              <Border Background="#33FFFFFF" Height="4" VerticalAlignment="Center" Panel.ZIndex="1" />
+              <Border Grid.Column="0" Background="#33FFFFFF" Height="4" VerticalAlignment="Center" Panel.ZIndex="1" />
+              <Border Grid.Column="1" Background="#33FFFFFF" Height="4" VerticalAlignment="Center" Panel.ZIndex="1" />
+              <Border Grid.Column="2" Background="#33FFFFFF" Height="4" VerticalAlignment="Center" Panel.ZIndex="1" />
+              <Border Grid.Column="3" Background="#33FFFFFF" Height="4" VerticalAlignment="Center" Panel.ZIndex="1" />
               <TextBlock x:Name="HitResultText"
                          FontSize="42"
                          FontWeight="SemiBold"

@@ -423,11 +423,14 @@ public partial class MainWindow : Window
 
             if (candidate.distance > GoodWindow)
             {
+                RegisterPoor(lane);
+                RemoveNote(candidate.note);
                 return;
             }
 
             _activeHolds[lane] = candidate.note;
             candidate.note.IsHolding = true;
+            candidate.note.HoldStartDistance = candidate.distance;
             return;
         }
 
@@ -448,6 +451,7 @@ public partial class MainWindow : Window
 
             _score += 100 * _perfectMultiplier;
             ShowHitResult("Perfect", _perfectBrush, lane);
+            ApplyHitEffect(candidate.note, _perfectBrush);
         }
         else
         {
@@ -455,6 +459,7 @@ public partial class MainWindow : Window
             _score += 50;
             ResetPerfectStreak();
             ShowHitResult("Good", _goodBrush, lane);
+            ApplyHitEffect(candidate.note, _goodBrush);
         }
 
         RemoveNote(candidate.note);
@@ -473,8 +478,9 @@ public partial class MainWindow : Window
 
         var middle = ArrowCanvas.ActualHeight / 2;
         var distance = Math.Abs(GetNoteCenterY(note) - middle);
+        var startDistance = note.HoldStartDistance;
 
-        if (distance <= PerfectWindow)
+        if (startDistance <= PerfectWindow && distance <= PerfectWindow)
         {
             _perfectCount += 1;
             _perfectStreak += 1;
@@ -485,13 +491,15 @@ public partial class MainWindow : Window
 
             _score += 100 * _perfectMultiplier;
             ShowHitResult("Perfect", _perfectBrush, lane);
+            ApplyHitEffect(note, _perfectBrush);
         }
-        else if (distance <= GoodWindow)
+        else if (startDistance <= GoodWindow && distance <= GoodWindow)
         {
             _goodCount += 1;
             _score += 50;
             ResetPerfectStreak();
             ShowHitResult("Good", _goodBrush, lane);
+            ApplyHitEffect(note, _goodBrush);
         }
         else
         {
@@ -576,6 +584,38 @@ public partial class MainWindow : Window
         Grid.SetColumn(HitResultText, lane);
         _feedbackTimer.Stop();
         _feedbackTimer.Start();
+    }
+
+    private void ApplyHitEffect(ArrowNote note, Brush brush)
+    {
+        var color = brush is SolidColorBrush solid ? solid.Color : Colors.White;
+        var glow = new DropShadowEffect
+        {
+            Color = color,
+            BlurRadius = 0,
+            ShadowDepth = 0,
+            Opacity = 0.9
+        };
+
+        note.Element.Effect = glow;
+
+        var blurAnimation = new DoubleAnimation
+        {
+            From = 0,
+            To = 24,
+            Duration = TimeSpan.FromMilliseconds(160),
+            AutoReverse = true
+        };
+        blurAnimation.Completed += (_, _) => note.Element.Effect = null;
+        glow.BeginAnimation(DropShadowEffect.BlurRadiusProperty, blurAnimation);
+
+        var opacityAnimation = new DoubleAnimation
+        {
+            From = 0.9,
+            To = 0,
+            Duration = TimeSpan.FromMilliseconds(300)
+        };
+        glow.BeginAnimation(DropShadowEffect.OpacityProperty, opacityAnimation);
     }
 
     private void FeedbackTimerOnTick(object? sender, EventArgs e)
@@ -1008,5 +1048,6 @@ public partial class MainWindow : Window
         public bool IsHold { get; }
         public Rectangle? Trail { get; }
         public bool IsHolding { get; set; }
+        public double HoldStartDistance { get; set; }
     }
 }
