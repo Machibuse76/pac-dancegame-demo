@@ -59,10 +59,8 @@ public partial class MainWindow : Window
         _accentBrush = (Brush)Application.Current.Resources["AccentBrush"];
         _player.MediaEnded += OnMediaEnded;
 
-        EasyButton.Click += EasyButtonOnClick;
-        StandardButton.Click += StandardButtonOnClick;
-        ExpertButton.Click += ExpertButtonOnClick;
         SongList.SelectionChanged += SongListOnSelectionChanged;
+        DifficultyList.SelectionChanged += DifficultyListOnSelectionChanged;
 
         _beatTimer.Tick += BeatTimerOnTick;
         _feedbackTimer.Interval = TimeSpan.FromSeconds(1);
@@ -79,7 +77,7 @@ public partial class MainWindow : Window
         LoadSongs();
         UpdateBpm();
         UpdateScoreboard();
-        UpdateDifficultyButtons();
+        InitializeDifficultyList();
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
@@ -817,21 +815,6 @@ public partial class MainWindow : Window
         FinalScorePanel.Visibility = Visibility.Collapsed;
     }
 
-    private void EasyButtonOnClick(object sender, RoutedEventArgs e)
-    {
-        SetDifficultyIndex(0);
-    }
-
-    private void StandardButtonOnClick(object sender, RoutedEventArgs e)
-    {
-        SetDifficultyIndex(1);
-    }
-
-    private void ExpertButtonOnClick(object sender, RoutedEventArgs e)
-    {
-        SetDifficultyIndex(2);
-    }
-
     private void SetDifficultyIndex(int index)
     {
         var clamped = Math.Clamp(index, 0, 2);
@@ -843,18 +826,35 @@ public partial class MainWindow : Window
             _ => 100
         };
         UpdateBpm();
-        UpdateDifficultyButtons();
+        UpdateDifficultyListSelection();
         if (_beatTimer.IsEnabled)
         {
             StartBeatTimer();
         }
     }
 
-    private void UpdateDifficultyButtons()
+    private void InitializeDifficultyList()
     {
-        EasyButton.Opacity = _difficultyIndex == 0 ? 1 : 0.6;
-        StandardButton.Opacity = _difficultyIndex == 1 ? 1 : 0.6;
-        ExpertButton.Opacity = _difficultyIndex == 2 ? 1 : 0.6;
+        DifficultyList.ItemsSource = new[] { "Easy", "Standard", "Expert" };
+        DifficultyList.SelectedIndex = _difficultyIndex;
+    }
+
+    private void DifficultyListOnSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (DifficultyList.SelectedIndex < 0)
+        {
+            return;
+        }
+
+        SetDifficultyIndex(DifficultyList.SelectedIndex);
+    }
+
+    private void UpdateDifficultyListSelection()
+    {
+        if (DifficultyList.SelectedIndex != _difficultyIndex)
+        {
+            DifficultyList.SelectedIndex = _difficultyIndex;
+        }
     }
 
     private void SelectPreviousSong()

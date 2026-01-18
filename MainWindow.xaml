@@ -31,21 +31,39 @@
                 <TextBlock Text=" • " Foreground="#FFB0B0B0" Margin="8,0" />
                 <TextBlock x:Name="NowPlaying" Foreground="#FFB0B0B0" FontSize="18" />
               </StackPanel>
-              <Border x:Name="SongCarouselPanel" Background="#33000000" CornerRadius="20" Padding="20" Margin="0,40,0,0" HorizontalAlignment="Right">
+              <Border x:Name="SongCarouselPanel" Background="#33000000" CornerRadius="20" Padding="24" Margin="0,40,0,0" HorizontalAlignment="Center">
                 <Grid>
                   <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="320" />
+                    <ColumnDefinition Width="340" />
                     <ColumnDefinition Width="420" />
                   </Grid.ColumnDefinitions>
                   <StackPanel HorizontalAlignment="Center">
-                    <Image x:Name="SongPreviewImage" Width="200" Height="200" Stretch="UniformToFill" Margin="0,0,0,12" />
-                    <TextBlock x:Name="SongPreviewTitle" FontSize="20" Foreground="White" HorizontalAlignment="Center" />
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
-                      <Button x:Name="EasyButton" Content="Easy" Width="90" Height="36" Margin="0,0,10,0" />
-                      <Button x:Name="StandardButton" Content="Standard" Width="110" Height="36" Margin="0,0,10,0" />
-                      <Button x:Name="ExpertButton" Content="Expert" Width="90" Height="36" />
-                    </StackPanel>
-                    <TextBlock x:Name="PressStartText" Text="Press Start (1)" Foreground="#FFB0B0B0" Margin="0,12,0,0" FontSize="16" HorizontalAlignment="Center" />
+                    <Image x:Name="SongPreviewImage" Width="220" Height="220" Stretch="UniformToFill" Margin="0,0,0,12" />
+                    <TextBlock x:Name="SongPreviewTitle" FontSize="22" Foreground="White" HorizontalAlignment="Center" />
+                    <ListBox x:Name="DifficultyList"
+                             Height="120"
+                             Margin="0,12,0,0"
+                             Background="Transparent"
+                             BorderBrush="Transparent"
+                             HorizontalContentAlignment="Center"
+                             ScrollViewer.VerticalScrollBarVisibility="Hidden">
+                      <ListBox.Resources>
+                        <Style TargetType="ListBoxItem">
+                          <Setter Property="FontSize" Value="16" />
+                          <Setter Property="Foreground" Value="#FFB0B0B0" />
+                          <Setter Property="Opacity" Value="0.5" />
+                          <Setter Property="Padding" Value="8,4" />
+                          <Style.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                              <Setter Property="FontSize" Value="20" />
+                              <Setter Property="Opacity" Value="1" />
+                              <Setter Property="Foreground" Value="#FF3DDCFF" />
+                            </Trigger>
+                          </Style.Triggers>
+                        </Style>
+                      </ListBox.Resources>
+                    </ListBox>
+                    <TextBlock x:Name="PressStartText" Text="Press Start (1)" Foreground="#FFB0B0B0" Margin="0,10,0,0" FontSize="16" HorizontalAlignment="Center" />
                   </StackPanel>
                   <ListBox x:Name="SongList"
                            Grid.Column="1"
