@@ -410,7 +410,7 @@ public partial class MainWindow : Window
 
         var middle = ArrowCanvas.ActualHeight / 2;
         var candidate = _activeNotes
-            .Where(note => note.Lane == lane)
+            .Where(note => note.Lane == lane && (!note.IsHold || !note.IsHolding))
             .Select(note => new { note, distance = Math.Abs(GetNoteCenterY(note) - middle) })
             .OrderBy(result => result.distance)
             .FirstOrDefault();
