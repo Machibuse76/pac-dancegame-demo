@@ -42,6 +42,7 @@ public partial class MainWindow : Window
     private bool _failed;
     private bool _isPlaying;
     private int _bpm = 80;
+    private int _difficultyIndex = 1;
     private readonly List<string> _backgroundImages = new();
     private int _backgroundIndex = -1;
     private int _totalArrowsSpawned;
@@ -78,6 +79,7 @@ public partial class MainWindow : Window
         LoadSongs();
         UpdateBpm();
         UpdateScoreboard();
+        UpdateDifficultyButtons();
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
@@ -253,6 +255,26 @@ public partial class MainWindow : Window
 
         if (!_isPlaying)
         {
+            if (e.Key == Key.Up)
+            {
+                SelectPreviousSong();
+                e.Handled = true;
+            }
+            else if (e.Key == Key.Down)
+            {
+                SelectNextSong();
+                e.Handled = true;
+            }
+            else if (e.Key == Key.Left)
+            {
+                SetDifficultyIndex(_difficultyIndex - 1);
+                e.Handled = true;
+            }
+            else if (e.Key == Key.Right)
+            {
+                SetDifficultyIndex(_difficultyIndex + 1);
+                e.Handled = true;
+            }
             return;
         }
 
@@ -797,27 +819,64 @@ public partial class MainWindow : Window
 
     private void EasyButtonOnClick(object sender, RoutedEventArgs e)
     {
-        SetDifficulty(60);
+        SetDifficultyIndex(0);
     }
 
     private void StandardButtonOnClick(object sender, RoutedEventArgs e)
     {
-        SetDifficulty(80);
+        SetDifficultyIndex(1);
     }
 
     private void ExpertButtonOnClick(object sender, RoutedEventArgs e)
     {
-        SetDifficulty(100);
+        SetDifficultyIndex(2);
     }
 
-    private void SetDifficulty(int bpm)
+    private void SetDifficultyIndex(int index)
     {
-        _bpm = bpm;
+        var clamped = Math.Clamp(index, 0, 2);
+        _difficultyIndex = clamped;
+        _bpm = clamped switch
+        {
+            0 => 60,
+            1 => 80,
+            _ => 100
+        };
         UpdateBpm();
+        UpdateDifficultyButtons();
         if (_beatTimer.IsEnabled)
         {
             StartBeatTimer();
         }
+    }
+
+    private void UpdateDifficultyButtons()
+    {
+        EasyButton.Opacity = _difficultyIndex == 0 ? 1 : 0.6;
+        StandardButton.Opacity = _difficultyIndex == 1 ? 1 : 0.6;
+        ExpertButton.Opacity = _difficultyIndex == 2 ? 1 : 0.6;
+    }
+
+    private void SelectPreviousSong()
+    {
+        if (_songs.Count == 0)
+        {
+            return;
+        }
+
+        _songIndex = (_songIndex - 1 + _songs.Count) % _songs.Count;
+        SongList.SelectedIndex = _songIndex;
+    }
+
+    private void SelectNextSong()
+    {
+        if (_songs.Count == 0)
+        {
+            return;
+        }
+
+        _songIndex = (_songIndex + 1) % _songs.Count;
+        SongList.SelectedIndex = _songIndex;
     }
 
     private void StartPreviewIfIdle()
@@ -887,7 +946,7 @@ public partial class MainWindow : Window
     private FrameworkElement CreateArrowShape(int lane, double size)
     {
         var geometry = Geometry.Parse("M 50,0 100,50 75,50 75,100 25,100 25,50 0,50 Z");
-        var path = new System.Windows.Shapes.Path
+        var path = new Path
         {
             Data = geometry,
             Width = size,
