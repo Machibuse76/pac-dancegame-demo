@@ -23,7 +23,7 @@ public partial class MainWindow : Window
     private readonly DispatcherTimer _feedbackTimer = new();
     private readonly DispatcherTimer _backgroundTimer = new();
     private readonly DispatcherTimer _countdownTimer = new();
-    private readonly DispatcherTimer _failureDisplayTimer = new();
+    private readonly DispatcherTimer _resultsDisplayTimer = new();
     private readonly DispatcherTimer _previewTimer = new();
     private readonly MediaPlayer _previewPlayer = new();
     private readonly Random _random = new();
@@ -69,8 +69,8 @@ public partial class MainWindow : Window
         _backgroundTimer.Tick += BackgroundTimerOnTick;
         _countdownTimer.Interval = TimeSpan.FromSeconds(1);
         _countdownTimer.Tick += CountdownTimerOnTick;
-        _failureDisplayTimer.Interval = TimeSpan.FromSeconds(3);
-        _failureDisplayTimer.Tick += FailureDisplayTimerOnTick;
+        _resultsDisplayTimer.Interval = TimeSpan.FromSeconds(30);
+        _resultsDisplayTimer.Tick += ResultsDisplayTimerOnTick;
         _previewTimer.Interval = TimeSpan.FromSeconds(15);
         _previewTimer.Tick += PreviewTimerOnTick;
         Loaded += OnLoaded;
@@ -104,10 +104,7 @@ public partial class MainWindow : Window
             .ToList());
 
         SongList.ItemsSource = _songs;
-        if (SongList.ItemTemplate is null)
-        {
-            SongList.DisplayMemberPath = nameof(SongItem.Name);
-        }
+        SongList.DisplayMemberPath = nameof(SongItem.Name);
 
         if (_songs.Count > 0)
         {
@@ -226,6 +223,7 @@ public partial class MainWindow : Window
         ScorePanel.Visibility = Visibility.Visible;
         _isPlaying = true;
         StopPreview();
+        _resultsDisplayTimer.Stop();
         _player.Open(new Uri(_currentSong.FilePath));
         _player.Play();
         StartBackgroundCycle();
@@ -704,9 +702,7 @@ public partial class MainWindow : Window
         }
 
         _failed = true;
-        EndSong(failed: true, showResults: false);
-        _failureDisplayTimer.Stop();
-        _failureDisplayTimer.Start();
+        EndSong(failed: true, showResults: true);
     }
 
     private void OnMediaEnded(object? sender, EventArgs e)
@@ -721,8 +717,8 @@ public partial class MainWindow : Window
         _feedbackTimer.Stop();
         _backgroundTimer.Stop();
         _countdownTimer.Stop();
-        _failureDisplayTimer.Stop();
         _previewTimer.Stop();
+        _resultsDisplayTimer.Stop();
         StopArrowAnimations();
         ClearHitResult();
         HideCountdown();
@@ -739,19 +735,26 @@ public partial class MainWindow : Window
         if (showResults)
         {
             ShowFinalResults(failed);
+            _resultsDisplayTimer.Start();
         }
 
         ScorePanel.Visibility = Visibility.Collapsed;
-        SongCarouselPanel.Visibility = Visibility.Visible;
-        StartPreviewIfIdle();
+        if (!showResults)
+        {
+            SongCarouselPanel.Visibility = Visibility.Visible;
+            StartPreviewIfIdle();
+        }
     }
 
-    private void FailureDisplayTimerOnTick(object? sender, EventArgs e)
+    private void ResultsDisplayTimerOnTick(object? sender, EventArgs e)
     {
-        _failureDisplayTimer.Stop();
+        _resultsDisplayTimer.Stop();
         FailureOverlay.Visibility = Visibility.Collapsed;
         FailedText.Visibility = Visibility.Collapsed;
-        ShowFinalResults(failed: true);
+        FinalScorePanel.Visibility = Visibility.Collapsed;
+        BackgroundImage.Opacity = 0.6;
+        SongCarouselPanel.Visibility = Visibility.Visible;
+        StartPreviewIfIdle();
     }
 
     private void StopArrowAnimations()
@@ -951,7 +954,7 @@ public partial class MainWindow : Window
     private FrameworkElement CreateArrowShape(int lane, double size)
     {
         var geometry = Geometry.Parse("M 50,0 100,50 75,50 75,100 25,100 25,50 0,50 Z");
-        var path = new System.Windows.Shapes.Path
+        var path = new Path
         {
             Data = geometry,
             Width = size,
