@@ -31,11 +31,11 @@
                 <TextBlock Text=" • " Foreground="#FFB0B0B0" Margin="8,0" />
                 <TextBlock x:Name="NowPlaying" Foreground="#FFB0B0B0" FontSize="18" />
               </StackPanel>
-              <Border x:Name="SongCarouselPanel" Background="#33000000" CornerRadius="20" Padding="24" Margin="0,40,0,0" HorizontalAlignment="Center">
+              <Border x:Name="SongCarouselPanel" Background="#33000000" CornerRadius="20" Padding="24" Margin="0,40,0,0" HorizontalAlignment="Right">
                 <Grid>
                   <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="340" />
-                    <ColumnDefinition Width="420" />
+                    <ColumnDefinition Width="520" />
                   </Grid.ColumnDefinitions>
                   <StackPanel HorizontalAlignment="Center">
                     <Image x:Name="SongPreviewImage" Width="220" Height="220" Stretch="UniformToFill" Margin="0,0,0,12" />
@@ -67,35 +67,35 @@
                   </StackPanel>
                   <ListBox x:Name="SongList"
                            Grid.Column="1"
-                           Background="#77222222"
-                           BorderBrush="#FF4A4A4A"
+                           Background="#88222222"
+                           BorderBrush="#FF5A5A5A"
                            Foreground="White"
-                           Height="360"
-                           Margin="28,0,0,0"
+                           Height="480"
+                           Margin="40,0,0,0"
                            HorizontalContentAlignment="Right"
                            VerticalContentAlignment="Center"
                            ScrollViewer.VerticalScrollBarVisibility="Hidden">
                     <ListBox.Resources>
                       <Style TargetType="ListBoxItem">
                         <Setter Property="HorizontalContentAlignment" Value="Right" />
-                        <Setter Property="Padding" Value="14,6" />
-                        <Setter Property="FontSize" Value="16" />
-                        <Setter Property="Opacity" Value="0.3" />
+                        <Setter Property="Padding" Value="18,8" />
+                        <Setter Property="FontSize" Value="18" />
+                        <Setter Property="Opacity" Value="0.25" />
                         <Setter Property="Foreground" Value="#FFB0B0B0" />
                         <Setter Property="RenderTransformOrigin" Value="1,0.5" />
                         <Setter Property="RenderTransform">
                           <Setter.Value>
-                            <ScaleTransform ScaleX="0.8" ScaleY="0.8" />
+                            <ScaleTransform ScaleX="0.75" ScaleY="0.75" />
                           </Setter.Value>
                         </Setter>
                         <Style.Triggers>
                           <Trigger Property="IsSelected" Value="True">
-                            <Setter Property="FontSize" Value="24" />
+                            <Setter Property="FontSize" Value="28" />
                             <Setter Property="Opacity" Value="1" />
                             <Setter Property="Foreground" Value="#FF3DDCFF" />
                             <Setter Property="RenderTransform">
                               <Setter.Value>
-                                <ScaleTransform ScaleX="1.25" ScaleY="1.25" />
+                                <ScaleTransform ScaleX="1.35" ScaleY="1.35" />
                               </Setter.Value>
                             </Setter>
                           </Trigger>
@@ -176,12 +176,12 @@
                   VerticalAlignment="Top"
                   Margin="0,12,0,0"
                   Panel.ZIndex="6">
-        <TextBlock x:Name="ScoreText" Text="Score: 0" Foreground="White" FontSize="16" HorizontalAlignment="Center" />
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,6,0,0">
-          <TextBlock x:Name="PerfectText" Text="Perfect: 0" Foreground="#FF3DDCFF" FontSize="16" Margin="0,0,12,0" />
-          <TextBlock x:Name="PerfectMultiplierText" Text="x1" Foreground="#FF7EEBFF" FontSize="14" Margin="0,0,12,0" VerticalAlignment="Center" />
-          <TextBlock x:Name="GoodText" Text="Good: 0" Foreground="#FFB0FFB0" FontSize="16" Margin="0,0,12,0" />
-          <TextBlock x:Name="PoorText" Text="Poor: 0" Foreground="#FFFFB0B0" FontSize="16" />
+        <TextBlock x:Name="ScoreText" Text="Score: 0" Foreground="White" FontSize="24" HorizontalAlignment="Center" />
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,8,0,0">
+          <TextBlock x:Name="PerfectText" Text="Perfect: 0" Foreground="#FF3DDCFF" FontSize="20" Margin="0,0,16,0" />
+          <TextBlock x:Name="PerfectMultiplierText" Text="x1" Foreground="#FF7EEBFF" FontSize="18" Margin="0,0,16,0" VerticalAlignment="Center" />
+          <TextBlock x:Name="GoodText" Text="Good: 0" Foreground="#FFB0FFB0" FontSize="20" Margin="0,0,16,0" />
+          <TextBlock x:Name="PoorText" Text="Poor: 0" Foreground="#FFFFB0B0" FontSize="20" />
         </StackPanel>
       </StackPanel>
       <StackPanel x:Name="FinalScorePanel"
