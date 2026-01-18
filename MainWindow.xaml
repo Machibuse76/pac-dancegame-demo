@@ -23,20 +23,20 @@
               <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <StackPanel Grid.Row="0" VerticalAlignment="Top">
+            <StackPanel Grid.Row="0" VerticalAlignment="Top" Margin="0,20,0,0">
               <StackPanel Orientation="Horizontal">
                 <TextBlock Text="Now Playing" Foreground="White" FontSize="22" FontWeight="SemiBold" />
                 <TextBlock Text=" • " Foreground="#FFB0B0B0" Margin="8,0" />
                 <TextBlock x:Name="NowPlaying" Foreground="#FFB0B0B0" FontSize="18" />
               </StackPanel>
-              <Border x:Name="SongCarouselPanel" Background="#33000000" CornerRadius="12" Padding="12" Margin="0,12,0,0">
+              <Border x:Name="SongCarouselPanel" Background="#33000000" CornerRadius="16" Padding="16" Margin="0,28,0,0" HorizontalAlignment="Right">
                 <Grid>
                   <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="280" />
+                    <ColumnDefinition Width="260" />
+                    <ColumnDefinition Width="320" />
                   </Grid.ColumnDefinitions>
                   <StackPanel HorizontalAlignment="Center">
-                    <Image x:Name="SongPreviewImage" Width="140" Height="140" Stretch="UniformToFill" Margin="0,0,0,8" />
+                    <Image x:Name="SongPreviewImage" Width="160" Height="160" Stretch="UniformToFill" Margin="0,0,0,12" />
                     <TextBlock x:Name="SongPreviewTitle" FontSize="18" Foreground="White" HorizontalAlignment="Center" />
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
                       <Button x:Name="EasyButton" Content="Easy" Width="80" Margin="0,0,8,0" />
@@ -47,33 +47,35 @@
                   </StackPanel>
                   <ListBox x:Name="SongList"
                            Grid.Column="1"
-                           Background="#22111111"
-                           BorderBrush="#33444444"
+                           Background="#66111111"
+                           BorderBrush="#FF3A3A3A"
                            Foreground="White"
-                           Height="220"
-                           Margin="16,0,0,0"
-                           HorizontalContentAlignment="Center"
+                           Height="280"
+                           Margin="24,0,0,0"
+                           HorizontalContentAlignment="Right"
+                           VerticalContentAlignment="Center"
                            ScrollViewer.VerticalScrollBarVisibility="Hidden">
                     <ListBox.Resources>
                       <Style TargetType="ListBoxItem">
-                        <Setter Property="HorizontalContentAlignment" Value="Center" />
-                        <Setter Property="Padding" Value="6,2" />
+                        <Setter Property="HorizontalContentAlignment" Value="Right" />
+                        <Setter Property="Padding" Value="10,4" />
                         <Setter Property="FontSize" Value="14" />
-                        <Setter Property="Opacity" Value="0.5" />
-                        <Setter Property="RenderTransformOrigin" Value="0.5,0.5" />
+                        <Setter Property="Opacity" Value="0.4" />
+                        <Setter Property="Foreground" Value="#FFB0B0B0" />
+                        <Setter Property="RenderTransformOrigin" Value="1,0.5" />
                         <Setter Property="RenderTransform">
                           <Setter.Value>
-                            <ScaleTransform ScaleX="0.9" ScaleY="0.9" />
+                            <ScaleTransform ScaleX="0.85" ScaleY="0.85" />
                           </Setter.Value>
                         </Setter>
                         <Style.Triggers>
                           <Trigger Property="IsSelected" Value="True">
-                            <Setter Property="FontSize" Value="18" />
+                            <Setter Property="FontSize" Value="20" />
                             <Setter Property="Opacity" Value="1" />
                             <Setter Property="Foreground" Value="#FF3DDCFF" />
                             <Setter Property="RenderTransform">
                               <Setter.Value>
-                                <ScaleTransform ScaleX="1.1" ScaleY="1.1" />
+                                <ScaleTransform ScaleX="1.15" ScaleY="1.15" />
                               </Setter.Value>
                             </Setter>
                           </Trigger>
