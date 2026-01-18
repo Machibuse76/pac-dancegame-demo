@@ -31,31 +31,37 @@
                 <TextBlock Text=" • " Foreground="#FFB0B0B0" Margin="8,0" />
                 <TextBlock x:Name="NowPlaying" Foreground="#FFB0B0B0" FontSize="18" />
               </StackPanel>
-              <Border x:Name="SongCarouselPanel" Background="#33000000" CornerRadius="20" Padding="24" Margin="0,40,0,0" HorizontalAlignment="Right">
+              <Border x:Name="SongCarouselPanel"
+                      Background="#33000000"
+                      CornerRadius="24"
+                      Padding="32"
+                      Margin="0,80,0,0"
+                      HorizontalAlignment="Center"
+                      Width="1320">
                 <Grid>
                   <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="340" />
-                    <ColumnDefinition Width="520" />
+                    <ColumnDefinition Width="560" />
+                    <ColumnDefinition Width="760" />
                   </Grid.ColumnDefinitions>
-                  <StackPanel HorizontalAlignment="Center">
-                    <Image x:Name="SongPreviewImage" Width="220" Height="220" Stretch="UniformToFill" Margin="0,0,0,12" />
-                    <TextBlock x:Name="SongPreviewTitle" FontSize="22" Foreground="White" HorizontalAlignment="Center" />
+                  <StackPanel HorizontalAlignment="Center" Margin="0,20,0,0">
+                    <Image x:Name="SongPreviewImage" Width="360" Height="360" Stretch="UniformToFill" Margin="0,0,0,16" />
+                    <TextBlock x:Name="SongPreviewTitle" FontSize="32" Foreground="White" HorizontalAlignment="Center" />
                     <ListBox x:Name="DifficultyList"
-                             Height="120"
-                             Margin="0,12,0,0"
+                             Height="200"
+                             Margin="0,16,0,0"
                              Background="Transparent"
                              BorderBrush="Transparent"
                              HorizontalContentAlignment="Center"
                              ScrollViewer.VerticalScrollBarVisibility="Hidden">
                       <ListBox.Resources>
                         <Style TargetType="ListBoxItem">
-                          <Setter Property="FontSize" Value="16" />
+                          <Setter Property="FontSize" Value="22" />
                           <Setter Property="Foreground" Value="#FFB0B0B0" />
                           <Setter Property="Opacity" Value="0.5" />
-                          <Setter Property="Padding" Value="8,4" />
+                          <Setter Property="Padding" Value="10,6" />
                           <Style.Triggers>
                             <Trigger Property="IsSelected" Value="True">
-                              <Setter Property="FontSize" Value="20" />
+                              <Setter Property="FontSize" Value="30" />
                               <Setter Property="Opacity" Value="1" />
                               <Setter Property="Foreground" Value="#FF3DDCFF" />
                             </Trigger>
@@ -63,24 +69,24 @@
                         </Style>
                       </ListBox.Resources>
                     </ListBox>
-                    <TextBlock x:Name="PressStartText" Text="Press Start (1)" Foreground="#FFB0B0B0" Margin="0,10,0,0" FontSize="16" HorizontalAlignment="Center" />
+                    <TextBlock x:Name="PressStartText" Text="Press Start (1)" Foreground="#FFB0B0B0" Margin="0,16,0,0" FontSize="22" HorizontalAlignment="Center" />
                   </StackPanel>
                   <ListBox x:Name="SongList"
                            Grid.Column="1"
                            Background="#88222222"
                            BorderBrush="#FF5A5A5A"
                            Foreground="White"
-                           Height="480"
-                           Margin="40,0,0,0"
+                           Height="560"
+                           Margin="60,0,0,0"
                            HorizontalContentAlignment="Right"
                            VerticalContentAlignment="Center"
                            ScrollViewer.VerticalScrollBarVisibility="Hidden">
                     <ListBox.Resources>
                       <Style TargetType="ListBoxItem">
                         <Setter Property="HorizontalContentAlignment" Value="Right" />
-                        <Setter Property="Padding" Value="18,8" />
-                        <Setter Property="FontSize" Value="18" />
-                        <Setter Property="Opacity" Value="0.25" />
+                        <Setter Property="Padding" Value="22,10" />
+                        <Setter Property="FontSize" Value="22" />
+                        <Setter Property="Opacity" Value="0.2" />
                         <Setter Property="Foreground" Value="#FFB0B0B0" />
                         <Setter Property="RenderTransformOrigin" Value="1,0.5" />
                         <Setter Property="RenderTransform">
@@ -90,12 +96,12 @@
                         </Setter>
                         <Style.Triggers>
                           <Trigger Property="IsSelected" Value="True">
-                            <Setter Property="FontSize" Value="28" />
+                            <Setter Property="FontSize" Value="36" />
                             <Setter Property="Opacity" Value="1" />
                             <Setter Property="Foreground" Value="#FF3DDCFF" />
                             <Setter Property="RenderTransform">
                               <Setter.Value>
-                                <ScaleTransform ScaleX="1.35" ScaleY="1.35" />
+                                <ScaleTransform ScaleX="1.5" ScaleY="1.5" />
                               </Setter.Value>
                             </Setter>
                           </Trigger>
