@@ -202,7 +202,7 @@
                   Margin="0,12,0,0"
                   Panel.ZIndex="6"
                   Visibility="Collapsed">
-        <TextBlock x:Name="ScoreText" Text="Score: 0" Foreground="White" FontSize="150" HorizontalAlignment="Center" />
+        <TextBlock x:Name="ScoreText" Text="Score: 0" Foreground="White" FontSize="100" HorizontalAlignment="Center" />
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,8,0,0">
           <TextBlock x:Name="PerfectText" Text="Perfect: 0" Foreground="#FF3DDCFF" FontSize="80" Margin="0,0,32,0" />
           <TextBlock x:Name="PerfectMultiplierText" Text="x1" Foreground="#FF7EEBFF" FontSize="64" Margin="0,0,32,0" VerticalAlignment="Center" />

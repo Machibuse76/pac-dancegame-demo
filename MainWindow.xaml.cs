@@ -417,7 +417,6 @@ public partial class MainWindow : Window
 
         if (candidate is null)
         {
-            RegisterPoor(lane);
             return;
         }
 
@@ -430,8 +429,6 @@ public partial class MainWindow : Window
 
             if (candidate.distance > GoodWindow)
             {
-                RegisterPoor(lane);
-                RemoveNote(candidate.note);
                 return;
             }
 
@@ -443,7 +440,6 @@ public partial class MainWindow : Window
 
         if (candidate.distance > GoodWindow)
         {
-            RegisterPoor(lane);
             return;
         }
 
